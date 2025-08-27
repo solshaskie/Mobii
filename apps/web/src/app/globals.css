@@ -1,0 +1,228 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100;200;300;400;500;600;700;800&display=swap');
+
+@layer base {
+  :root {
+    /* Default theme colors (will be overridden by theme provider) */
+    --background-primary: #0a0a0a;
+    --background-secondary: #1a1a1a;
+    --background-tertiary: #2a2a2a;
+    --text-primary: #ffffff;
+    --text-secondary: #b3b3b3;
+    --text-muted: #666666;
+    --accent: #ff0080;
+    --accent-green: #00ff88;
+    --accent-blue: #0080ff;
+    --accent-purple: #8000ff;
+    --accent-orange: #ff8000;
+    --border: #333333;
+    --success: #00ff88;
+    --warning: #ff8000;
+    --error: #ff4444;
+    --info: #0080ff;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background-primary text-text-primary;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--background-secondary);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--text-muted);
+  }
+
+  /* Selection styles */
+  ::selection {
+    background: var(--accent);
+    color: var(--text-primary);
+  }
+
+  /* Focus styles */
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  /* Button variants */
+  .btn-primary {
+    @apply bg-accent text-text-primary px-4 py-2 rounded-lg font-medium transition-all duration-200 hover:bg-accent/90 active:scale-95;
+  }
+
+  .btn-secondary {
+    @apply bg-background-secondary text-text-primary px-4 py-2 rounded-lg font-medium transition-all duration-200 hover:bg-background-tertiary active:scale-95 border border-border;
+  }
+
+  .btn-ghost {
+    @apply bg-transparent text-text-secondary px-4 py-2 rounded-lg font-medium transition-all duration-200 hover:bg-background-secondary hover:text-text-primary active:scale-95;
+  }
+
+  /* Card styles */
+  .card {
+    @apply bg-background-secondary border border-border rounded-xl p-6 shadow-lg;
+  }
+
+  .card-hover {
+    @apply card transition-all duration-200 hover:shadow-xl hover:border-accent/20 hover:bg-background-tertiary;
+  }
+
+  /* Input styles */
+  .input {
+    @apply bg-background-tertiary border border-border rounded-lg px-4 py-2 text-text-primary placeholder:text-text-muted focus:border-accent focus:outline-none transition-all duration-200;
+  }
+
+  /* Neon glow effects */
+  .neon-glow {
+    box-shadow: 0 0 20px var(--accent);
+  }
+
+  .neon-glow-green {
+    box-shadow: 0 0 20px var(--accent-green);
+  }
+
+  .neon-glow-blue {
+    box-shadow: 0 0 20px var(--accent-blue);
+  }
+
+  .neon-glow-purple {
+    box-shadow: 0 0 20px var(--accent-purple);
+  }
+
+  /* Glass morphism */
+  .glass {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  /* Gradient text */
+  .gradient-text {
+    background: linear-gradient(135deg, var(--accent-pink), var(--accent-blue));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Container responsive */
+  .container-responsive {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  /* Prevent screen saver during workouts */
+  .workout-active {
+    animation: keep-awake 1s infinite;
+  }
+
+  @keyframes keep-awake {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.999;
+    }
+  }
+}
+
+@layer utilities {
+  /* Text utilities */
+  .text-gradient {
+    @apply gradient-text;
+  }
+
+  /* Animation utilities */
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  .animate-pulse-slow {
+    animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  /* Spacing utilities */
+  .space-y-responsive > * + * {
+    @apply mt-4 sm:mt-6 lg:mt-8;
+  }
+
+  /* Responsive utilities */
+  .responsive-grid {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6;
+  }
+}
+
+/* Custom animations */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes glow {
+  0% {
+    box-shadow: 0 0 20px rgba(255, 0, 128, 0.5);
+  }
+  100% {
+    box-shadow: 0 0 40px rgba(255, 0, 128, 0.8);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Prevent screen saver during workouts */
+.workout-active {
+  animation: keep-awake 1s infinite;
+}
+
+@keyframes keep-awake {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.999;
+  }
+}
+
+/* Print styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  body {
+    background: white !important;
+    color: black !important;
+  }
+}

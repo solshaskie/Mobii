@@ -1,0 +1,55 @@
+{
+  "name": "mobii",
+  "version": "0.1.0",
+  "description": "Personalized Chair Yoga & Calisthenics Web App",
+  "private": true,
+  "workspaces": [
+    "apps/web",
+    "apps/api",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "turbo run dev",
+    "dev:web": "turbo run dev --filter=web",
+    "dev:api": "turbo run dev --filter=api",
+    "dev:all": "turbo run dev --parallel",
+    "build": "turbo run build",
+    "build:web": "turbo run build --filter=web",
+    "build:api": "turbo run build --filter=api",
+    "build:all": "turbo run build --parallel",
+    "lint": "turbo run lint",
+    "lint:all": "turbo run lint --parallel",
+    "test": "turbo run test",
+    "test:web": "turbo run test --filter=web",
+    "test:api": "turbo run test --filter=api",
+    "test:all": "turbo run test --parallel",
+    "test:web:coverage": "turbo run test:coverage --filter=web",
+    "clean": "turbo run clean",
+    "type-check": "turbo run type-check",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "db:generate": "turbo run db:generate",
+    "db:push": "turbo run db:push",
+    "db:migrate": "turbo run db:migrate",
+    "db:migrate:deploy": "turbo run db:migrate:deploy",
+    "db:seed:prod": "turbo run db:seed:prod",
+    "db:verify": "turbo run db:verify",
+    "lighthouse": "turbo run lighthouse",
+    "deploy:staging": "vercel --env production",
+    "deploy:prod": "vercel --prod --env production",
+    "analyze": "turbo run analyze",
+    "security:audit": "npm audit --audit-level moderate",
+    "security:fix": "npm audit fix"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "prettier": "^3.1.0",
+    "turbo": "^1.11.0",
+    "typescript": "^5.3.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "packageManager": "npm@10.2.0"
+}

@@ -1,0 +1,303 @@
+import { Router } from 'express';
+import { z } from 'zod';
+import { PrismaClient } from '@prisma/client';
+import OpenAI from 'openai';
+
+const router = Router();
+const prisma = new PrismaClient();
+
+// Initialize OpenAI
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+
+// Validation schemas
+const generateWorkoutSchema = z.object({
+  type: z.enum(['chair_yoga', 'calisthenics', 'mixed']),
+  difficulty: z.enum(['beginner', 'intermediate', 'advanced']),
+  duration: z.number().min(5).max(180),
+  focus: z.string().optional(),
+  equipment: z.array(z.string()).optional(),
+  injuries: z.array(z.string()).optional(),
+  preferences: z.string().optional(),
+});
+
+// Generate AI workout
+router.post('/generate-workout', async (req, res, next) => {
+  try {
+    const userId = req.user!.id;
+    const data = generateWorkoutSchema.parse(req.body);
+
+    // Get user's fitness profile
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        fitnessProfile: true,
+        preferences: true,
+      },
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        error: 'Not Found',
+        message: 'User not found',
+      });
+    }
+
+    // Get available exercises
+    const exercises = await prisma.exercise.findMany({
+      where: {
+        isActive: true,
+        category: { in: data.type === 'mixed' ? ['chair_yoga', 'calisthenics'] : [data.type] },
+        difficulty: data.difficulty,
+      },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        category: true,
+        difficulty: true,
+        duration: true,
+        calories: true,
+        equipmentRequired: true,
+        targetMuscles: true,
+        instructions: true,
+      },
+    });
+
+    if (exercises.length === 0) {
+      return res.status(400).json({
+        error: 'Bad Request',
+        message: 'No exercises available for the specified criteria',
+      });
+    }
+
+    // Create AI prompt
+    const prompt = `
+Generate a personalized ${data.type} workout plan for a user with the following specifications:
+
+User Profile:
+- Fitness Level: ${user.fitnessProfile?.fitnessLevel || 'beginner'}
+- Primary Goal: ${user.fitnessProfile?.primaryGoal || 'general fitness'}
+- Age: ${user.fitnessProfile?.age || 'not specified'}
+- Weight: ${user.fitnessProfile?.weight || 'not specified'} kg
+- Height: ${user.fitnessProfile?.height || 'not specified'} cm
+
+Workout Requirements:
+- Type: ${data.type}
+- Difficulty: ${data.difficulty}
+- Duration: ${data.duration} minutes
+- Focus: ${data.focus || 'general fitness'}
+- Available Equipment: ${data.equipment?.join(', ') || 'none'}
+- Injuries/Concerns: ${data.injuries?.join(', ') || 'none'}
+- Additional Preferences: ${data.preferences || 'none'}
+
+Available Exercises (${exercises.length} total):
+${exercises.map(ex => `- ${ex.name} (${ex.category}, ${ex.difficulty}, ${ex.duration}s, targets: ${ex.targetMuscles.join(', ')})`).join('\n')}
+
+Please generate a workout plan that:
+1. Fits within the ${data.duration} minute duration
+2. Includes 5-10 exercises from the available list
+3. Provides a logical flow and progression
+4. Considers the user's fitness level and any injuries
+5. Includes specific instructions for each exercise
+6. Provides rest periods between exercises
+
+Return the response as a JSON object with the following structure:
+{
+  "name": "Workout name",
+  "description": "Brief description of the workout",
+  "estimatedCalories": number,
+  "exercises": [
+    {
+      "exerciseId": "exercise_id_from_list",
+      "order": number,
+      "duration": number_in_seconds,
+      "sets": number_optional,
+      "reps": number_optional,
+      "restTime": number_in_seconds_optional,
+      "customInstructions": "string_optional"
+    }
+  ]
+}
+`;
+
+    // Generate workout using OpenAI
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-4',
+      messages: [
+        {
+          role: 'system',
+          content: 'You are a professional fitness trainer specializing in chair yoga and calisthenics. Generate safe, effective, and personalized workout plans.',
+        },
+        {
+          role: 'user',
+          content: prompt,
+        },
+      ],
+      temperature: 0.7,
+      max_tokens: 2000,
+    });
+
+    const response = completion.choices[0]?.message?.content;
+    
+    if (!response) {
+      throw new Error('No response from OpenAI');
+    }
+
+    // Parse the JSON response
+    let workoutData;
+    try {
+      workoutData = JSON.parse(response);
+    } catch (error) {
+      console.error('Failed to parse OpenAI response:', response);
+      throw new Error('Invalid response format from AI');
+    }
+
+    // Validate the generated workout
+    if (!workoutData.name || !workoutData.exercises || !Array.isArray(workoutData.exercises)) {
+      throw new Error('Invalid workout structure generated by AI');
+    }
+
+    // Verify all exercise IDs exist
+    const exerciseIds = workoutData.exercises.map((ex: any) => ex.exerciseId);
+    const validExercises = exercises.filter(ex => exerciseIds.includes(ex.id));
+    
+    if (validExercises.length !== exerciseIds.length) {
+      throw new Error('Some exercises in the generated workout are not available');
+    }
+
+    // Create the workout plan
+    const workoutPlan = await prisma.workoutPlan.create({
+      data: {
+        userId,
+        name: workoutData.name,
+        description: workoutData.description,
+        type: data.type,
+        difficulty: data.difficulty,
+        duration: data.duration,
+        calories: workoutData.estimatedCalories || Math.round((data.duration * 5)),
+        aiGenerated: true,
+        aiPrompt: prompt,
+        exercises: {
+          create: workoutData.exercises.map((exercise: any) => ({
+            exerciseId: exercise.exerciseId,
+            order: exercise.order,
+            duration: exercise.duration,
+            sets: exercise.sets,
+            reps: exercise.reps,
+            restTime: exercise.restTime,
+            customInstructions: exercise.customInstructions,
+          })),
+        },
+      },
+      include: {
+        exercises: {
+          include: {
+            exercise: {
+              select: {
+                id: true,
+                name: true,
+                category: true,
+                difficulty: true,
+                duration: true,
+                imageUrl: true,
+                instructions: true,
+                equipmentRequired: true,
+                targetMuscles: true,
+              },
+            },
+          },
+          orderBy: { order: 'asc' },
+        },
+      },
+    });
+
+    res.status(201).json({
+      message: 'AI workout generated successfully',
+      workoutPlan,
+    });
+  } catch (error) {
+    console.error('AI workout generation error:', error);
+    next(error);
+  }
+});
+
+// Get AI workout suggestions
+router.get('/suggestions', async (req, res, next) => {
+  try {
+    const userId = req.user!.id;
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        fitnessProfile: true,
+        workoutSessions: {
+          where: { status: 'completed' },
+          orderBy: { startTime: 'desc' },
+          take: 5,
+        },
+      },
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        error: 'Not Found',
+        message: 'User not found',
+      });
+    }
+
+    // Generate personalized suggestions based on user data
+    const suggestions = [
+      {
+        type: 'chair_yoga',
+        difficulty: 'beginner',
+        duration: 15,
+        name: 'Morning Chair Yoga',
+        description: 'Gentle stretches to start your day',
+        reason: 'Perfect for beginners and morning routines',
+      },
+      {
+        type: 'calisthenics',
+        difficulty: 'intermediate',
+        duration: 30,
+        name: 'Strength Builder',
+        description: 'Build strength with bodyweight exercises',
+        reason: 'Based on your fitness level',
+      },
+      {
+        type: 'mixed',
+        difficulty: 'beginner',
+        duration: 20,
+        name: 'Balanced Workout',
+        description: 'Mix of yoga and calisthenics',
+        reason: 'Great variety for overall fitness',
+      },
+    ];
+
+    // Customize suggestions based on user's recent activity
+    if (user.workoutSessions.length > 0) {
+      const recentWorkouts = user.workoutSessions;
+      const completedTypes = recentWorkouts.map(w => w.workoutPlan?.type).filter(Boolean);
+      
+      // Suggest different types if user has been doing the same type
+      if (completedTypes.length > 0 && completedTypes.every(type => type === completedTypes[0])) {
+        const currentType = completedTypes[0];
+        suggestions.unshift({
+          type: currentType === 'chair_yoga' ? 'calisthenics' : 'chair_yoga',
+          difficulty: 'beginner',
+          duration: 25,
+          name: 'Try Something New',
+          description: `Switch to ${currentType === 'chair_yoga' ? 'calisthenics' : 'chair yoga'}`,
+          reason: 'Variety helps prevent plateaus',
+        });
+      }
+    }
+
+    res.json({ suggestions });
+  } catch (error) {
+    next(error);
+  }
+});
+
+export default router;

@@ -1,0 +1,344 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String
+  avatar    String?
+  password  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Profile
+  fitnessProfile FitnessProfile?
+  preferences    UserPreferences?
+
+  // Workouts
+  workoutPlans   WorkoutPlan[]
+  workoutSessions WorkoutSession[]
+  
+  // Progress
+  progressEntries ProgressEntry[]
+  achievements    Achievement[]
+
+  // Auth
+  sessions Session[]
+
+  @@map("users")
+}
+
+model FitnessProfile {
+  id          String @id @default(cuid())
+  userId      String @unique
+  user        User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Basic Info
+  age         Int?
+  weight      Float? // kg
+  height      Float? // cm
+  gender      String?
+  
+  // Fitness Level
+  fitnessLevel String @default("beginner") // beginner, intermediate, advanced
+  
+  // Goals
+  primaryGoal   String? // weight_loss, muscle_gain, flexibility, strength, endurance
+  secondaryGoal String?
+  
+  // Medical Info
+  medicalConditions String[]
+  injuries          String[]
+  medications       String[]
+  
+  // Preferences
+  preferredWorkoutDuration Int? // minutes
+  preferredWorkoutTime     String? // morning, afternoon, evening
+  equipmentAvailable       String[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("fitness_profiles")
+}
+
+model UserPreferences {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Theme
+  theme ThemeType @default(DARK)
+  
+  // Audio
+  ttsVoice    String  @default("alloy")
+  ttsSpeed    Float   @default(1.0)
+  audioVolume Float   @default(0.8)
+  musicEnabled Boolean @default(true)
+  
+  // Notifications
+  notificationsEnabled Boolean @default(true)
+  
+  // UI
+  autoPlayVideos Boolean @default(true)
+  showTimer      Boolean @default(true)
+  showCalories   Boolean @default(true)
+  language       String  @default("en")
+  
+  // Accessibility
+  highContrast Boolean @default(false)
+  largeText    Boolean @default(false)
+  reducedMotion Boolean @default(false)
+  screenReader Boolean @default(false)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("user_preferences")
+}
+
+model Exercise {
+  id          String @id @default(cuid())
+  name        String
+  description String
+  category    String // chair_yoga, calisthenics, strength, cardio, flexibility
+  difficulty  String // beginner, intermediate, advanced
+  duration    Int    // seconds
+  calories    Int    // calories per minute
+  
+  // Media
+  videoUrl    String?
+  imageUrl    String?
+  instructions String[]
+  
+  // Equipment
+  equipmentRequired String[]
+  equipmentOptional String[]
+  
+  // Target Areas
+  targetMuscles String[]
+  targetAreas   String[]
+  
+  // Instructions
+  setupInstructions String?
+  executionNotes    String?
+  safetyNotes       String?
+  
+  // Metadata
+  tags        String[]
+  isActive    Boolean @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("exercises")
+}
+
+model WorkoutPlan {
+  id          String @id @default(cuid())
+  userId      String
+  user        User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Plan Details
+  name        String
+  description String?
+  type        String // chair_yoga, calisthenics, mixed
+  difficulty  String // beginner, intermediate, advanced
+  duration    Int    // minutes
+  calories    Int    // estimated calories
+  
+  // AI Generation
+  aiGenerated Boolean @default(false)
+  aiPrompt    String?
+  
+  // Status
+  status      String @default("draft") // draft, active, completed, archived
+  
+  // Schedule
+  scheduledDate DateTime?
+  completedDate DateTime?
+  
+  // Feedback
+  userRating    Int? // 1-5 stars
+  userFeedback  String?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  exercises WorkoutExercise[]
+  sessions  WorkoutSession[]
+
+  @@map("workout_plans")
+}
+
+model WorkoutExercise {
+  id           String @id @default(cuid())
+  workoutPlanId String
+  workoutPlan   WorkoutPlan @relation(fields: [workoutPlanId], references: [id], onDelete: Cascade)
+  
+  exerciseId   String
+  exercise     Exercise @relation(fields: [exerciseId], references: [id])
+  
+  // Exercise Configuration
+  order       Int     // sequence in workout
+  duration    Int     // seconds
+  sets        Int?    // number of sets
+  reps        Int?    // reps per set
+  restTime    Int?    // rest between sets (seconds)
+  
+  // Customization
+  customInstructions String?
+  modifications      String?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("workout_exercises")
+}
+
+model WorkoutSession {
+  id           String @id @default(cuid())
+  userId       String
+  user         User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  workoutPlanId String?
+  workoutPlan   WorkoutPlan? @relation(fields: [workoutPlanId], references: [id])
+  
+  // Session Details
+  startTime    DateTime
+  endTime      DateTime?
+  duration     Int? // actual duration in minutes
+  calories     Int? // actual calories burned
+  
+  // Status
+  status       String @default("in_progress") // in_progress, completed, paused, abandoned
+  
+  // Performance
+  exercisesCompleted Int @default(0)
+  totalExercises     Int
+  
+  // Notes
+  notes        String?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  exerciseSessions ExerciseSession[]
+
+  @@map("workout_sessions")
+}
+
+model ExerciseSession {
+  id              String @id @default(cuid())
+  workoutSessionId String
+  workoutSession   WorkoutSession @relation(fields: [workoutSessionId], references: [id], onDelete: Cascade)
+  
+  exerciseId      String
+  exercise        Exercise @relation(fields: [exerciseId], references: [id])
+  
+  // Performance
+  startTime       DateTime
+  endTime         DateTime?
+  duration        Int? // actual duration in seconds
+  setsCompleted   Int @default(0)
+  repsCompleted   Int @default(0)
+  
+  // User Feedback
+  difficulty     Int? // 1-10 scale
+  enjoyment      Int? // 1-10 scale
+  notes          String?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("exercise_sessions")
+}
+
+model ProgressEntry {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Metrics
+  date       DateTime
+  weight     Float? // kg
+  bodyFat    Float? // percentage
+  muscleMass Float? // kg
+  
+  // Measurements
+  chest      Float? // cm
+  waist      Float? // cm
+  hips       Float? // cm
+  arms       Float? // cm
+  thighs     Float? // cm
+  
+  // Performance
+  maxPushUps    Int?
+  maxSquats     Int?
+  plankDuration Int? // seconds
+  flexibility   Float? // cm
+  
+  // Notes
+  notes String?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("progress_entries")
+}
+
+model Achievement {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Achievement Details
+  type        String // workout_streak, total_workouts, weight_loss, etc.
+  title       String
+  description String
+  icon        String?
+  
+  // Progress
+  currentValue Int
+  targetValue  Int
+  isCompleted  Boolean @default(false)
+  
+  // Metadata
+  earnedAt     DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("achievements")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expires      DateTime
+
+  @@map("sessions")
+}
+
+// Enums
+enum ThemeType {
+  DARK
+  LIGHT
+  ACTIVE
+  MOTIVATING
+  LOW_STRAIN
+  ZEN
+  OCEAN
+  SUNSET
+}
