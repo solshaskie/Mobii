@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useEffect } from 'react';
-import { UserProfile } from '../../components/ui/user-profile';
-import { userProfileService } from '../../services/user-profile-service';
+import { UserProfile } from '../../features/progress-tracking/components/user-profile';
+import { userProfileService } from '../../features/progress-tracking/services/user-profile-service';
 import { Button } from '@mobii/ui';
 import { Database, RotateCcw, User } from 'lucide-react';
 

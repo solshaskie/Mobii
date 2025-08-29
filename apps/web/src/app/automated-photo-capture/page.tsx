@@ -5,8 +5,8 @@ import { Button } from '@mobii/ui';
 import { Camera, CheckCircle, ArrowLeft } from 'lucide-react';
 
 // Error boundary component
-class ErrorBoundary extends React.Component {
-  constructor(props) {
+class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean; error: Error | null }> {
+  constructor(props: { children: React.ReactNode }) {
     super(props);
     this.state = { hasError: false, error: null };
   }
@@ -43,7 +43,7 @@ class ErrorBoundary extends React.Component {
 
 // Lazy load the complex component
 const AutomatedPhotoCapture = React.lazy(() => 
-  import('../../components/ui/automated-photo-capture').then(module => ({
+  import('../../features/camera-ai/components/automated-photo-capture').then(module => ({
     default: module.AutomatedPhotoCapture
   }))
 );

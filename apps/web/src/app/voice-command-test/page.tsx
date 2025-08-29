@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import { VoiceCommand } from '../../components/ui/voice-command';
-import { VoiceCommandResult } from '../../services/voice-command-service';
+import { VoiceCommand } from '../../features/voice-coaching/components/voice-command';
+import { VoiceCommandResult } from '../../features/voice-coaching/services/voice-command-service';
 import { Card, CardContent, CardHeader, CardTitle, Button, Badge } from '@mobii/ui';
 import { Mic, Volume2, Play, Pause, SkipForward, RotateCcw } from 'lucide-react';
 import { motion } from 'framer-motion';

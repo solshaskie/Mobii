@@ -6,12 +6,12 @@
 // - Voice feedback integration
 // - Photo capture automation
 
-export { default as CameraWorkoutPlayer } from './components/CameraWorkoutPlayer';
-export { default as AutomatedPhotoCapture } from './components/AutomatedPhotoCapture';
-export { default as DynamicAROverlay } from './components/DynamicAROverlay';
+export { CameraWorkoutPlayer } from './components/camera-workout-player';
+export { AutomatedPhotoCapture } from './components/automated-photo-capture';
+export { DynamicAROverlay } from './components/dynamic-ar-overlay';
 
-export { default as PoseDetectionService } from './services/PoseDetectionService';
-export { default as BodyTrackingService } from './services/BodyTrackingService';
+export { PoseDetectionService } from './services/pose-detection-service';
+export { BodyTrackingService } from './services/body-tracking-service';
 
 export type { CameraAIConfig } from './types';
 export type { PoseAnalysisResult } from './types';

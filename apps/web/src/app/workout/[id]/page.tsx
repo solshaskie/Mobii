@@ -4,11 +4,11 @@ import { useParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Button, Card, CardContent, CardHeader, CardTitle, Progress, Badge } from '@mobii/ui';
 import BrandHeader from '../../../components/ui/brand-header';
-import { CompactYouTubeVideo } from '../../../components/ui/youtube-video';
-import { YouTubeService } from '../../../services/youtube-service';
-import { CompactVoiceCoaching } from '../../../components/ui/voice-coaching';
-import { CompactVoiceCommand } from '../../../components/ui/voice-command';
-import { CameraWorkoutPlayer } from '../../../components/ui/camera-workout-player';
+import { CompactYouTubeVideo } from '../../../features/workout-player/components/youtube-video';
+import { YouTubeService } from '../../../features/workout-player/services/youtube-service';
+import { CompactVoiceCoaching } from '../../../features/voice-coaching/components/voice-coaching';
+import { CompactVoiceCommand } from '../../../features/voice-coaching/components/voice-command';
+import { CameraWorkoutPlayer } from '../../../features/camera-ai/components/camera-workout-player';
 import { 
   Play, 
   Pause, 

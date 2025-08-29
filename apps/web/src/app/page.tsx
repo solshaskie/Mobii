@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Button, Card, CardContent, CardHeader, CardTitle } from '@mobii/ui';
 import { motion } from 'framer-motion';
-import MobiiIntroScreen from '../components/MobiiIntroScreen';
+import MobiiIntroScreen from '../components/ui/MobiiIntroScreen';
 import Logo from '../components/ui/logo';
 import BrandCard from '../components/ui/brand-card';
 import {

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { CameraWorkoutPlayer } from '../../components/ui/camera-workout-player';
+import { CameraWorkoutPlayer } from '../../features/camera-ai/components/camera-workout-player';
 import { Button, Card, CardContent, CardHeader, CardTitle } from '@mobii/ui';
 import { Camera, Video, Brain, Target, Volume2 } from 'lucide-react';
 

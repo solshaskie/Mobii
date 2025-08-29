@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import { VoiceCoaching } from '../../components/ui/voice-coaching';
-import { VoiceCoachingService } from '../../services/voice-coaching-service';
+import { VoiceCoaching } from '../../features/voice-coaching/components/voice-coaching';
+import { VoiceCoachingService } from '../../features/voice-coaching/services/voice-coaching-service';
 import { Button, Card, CardContent, CardHeader, CardTitle } from '@mobii/ui';
 import { Mic, MicOff, Play, Pause, Volume2, Settings } from 'lucide-react';
 

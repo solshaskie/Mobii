@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useEffect } from 'react';
-import { WeightTracking } from '../../components/ui/weight-tracking';
-import { weightTrackingService } from '../../services/weight-tracking-service';
+import { WeightTracking } from '../../features/progress-tracking/components/weight-tracking';
+import { weightTrackingService } from '../../features/progress-tracking/services/weight-tracking-service';
 import { Button } from '@mobii/ui';
 import { Database, RotateCcw } from 'lucide-react';
 

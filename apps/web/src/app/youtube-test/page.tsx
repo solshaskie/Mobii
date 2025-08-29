@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { YouTubeVideo } from '../../components/ui/youtube-video';
-import { YouTubeService } from '../../services/youtube-service';
+import { YouTubeVideo } from '../../features/workout-player/components/youtube-video';
+import { YouTubeService } from '../../features/workout-player/services/youtube-service';
 import { Button, Card, CardContent, CardHeader, CardTitle } from '@mobii/ui';
 import { Search, Play, Loader2 } from 'lucide-react';
 

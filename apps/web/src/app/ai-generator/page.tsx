@@ -96,7 +96,7 @@ export default function AIGeneratorPage() {
     setIsGenerating(true);
     try {
       // Import the AI service dynamically to avoid SSR issues
-      const { AIService } = await import('../../services/ai-service');
+      const { AIService } = await import('../../features/ai-generator');
       const aiService = new AIService();
       
       // Convert preferences to match the AI service interface
