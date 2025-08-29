@@ -1,19 +1,19 @@
-// Voice Coaching Module - Main Export
-// This module handles all voice-related functionality including:
-// - Text-to-Speech (TTS) for coaching
-// - Speech recognition for voice commands
-// - Voice feedback and instructions
+// Voice Coaching Module
+// - AI-powered voice coaching and feedback
+// - Real-time voice commands and interactions
+// - Multiple voice styles and personalities
 // - Voice command processing
 
 export { VoiceCoaching } from './components/voice-coaching';
 export { VoiceCommand } from './components/voice-command';
+export { RealTimeVoiceCoach } from './components/real-time-voice-coach';
+export { VoiceSelector } from './components/voice-selector';
 
 export { VoiceCoachingService } from './services/voice-coaching-service';
 export { VoiceCommandService } from './services/voice-command-service';
 
 export type { VoiceCoachingConfig } from './types';
-export type { VoiceCommandType } from './types';
-export type { VoiceFeedback } from './types';
+export type { VoiceOption } from './components/voice-selector';
 
 // Feature gate for premium voice coaching features
 export const voiceCoachingFeatureGate = {
