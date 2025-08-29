@@ -1,80 +1,307 @@
 'use client';
-
-import { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { Button, Card, CardContent, CardHeader, CardTitle } from '@mobii/ui';
 import { motion } from 'framer-motion';
-import { DashboardStats } from '@/components/dashboard/dashboard-stats';
-import { TodayWorkout } from '@/components/dashboard/today-workout';
-import { RecentActivity } from '@/components/dashboard/recent-activity';
-import { WelcomeMessage } from '@/components/dashboard/welcome-message';
+import MobiiIntroScreen from '../components/MobiiIntroScreen';
+import Logo from '../components/ui/logo';
+import BrandCard from '../components/ui/brand-card';
+import {
+  Dumbbell,
+  Activity,
+  Target,
+  TrendingUp,
+  Heart,
+  Clock,
+  Play,
+  BarChart3,
+  Zap,
+  Award,
+  Calendar,
+  Users,
+  CheckCircle,
+  Flame
+} from 'lucide-react';
 
-export default function DashboardPage() {
-  const [isLoading, setIsLoading] = useState(true);
+export default function HomePage() {
+  const [showIntro, setShowIntro] = useState(true);
 
-  useEffect(() => {
-    // Simulate loading time
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1000);
+  const handleIntroComplete = () => {
+    setShowIntro(false);
+  };
 
-    return () => clearTimeout(timer);
-  }, []);
-
-  if (isLoading) {
-    return (
-      <div className="container-responsive py-8">
-        <div className="space-y-6">
-          {/* Loading skeleton */}
-          <div className="skeleton h-8 w-64 rounded-lg" />
-          <div className="skeleton h-32 w-full rounded-xl" />
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[...Array(4)].map((_, i) => (
-              <div key={i} className="skeleton h-24 rounded-xl" />
-            ))}
-          </div>
-          <div className="skeleton h-48 w-full rounded-xl" />
-        </div>
-      </div>
-    );
+  if (showIntro) {
+    return <MobiiIntroScreen onComplete={handleIntroComplete} />;
   }
 
   return (
-    <div className="container-responsive py-8">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="space-y-8"
-      >
-        {/* Welcome Message */}
-        <WelcomeMessage />
-
-        {/* Today's Workout */}
-        <motion.div
+    <div className="min-h-screen bg-background-primary">
+      <main className="max-w-7xl mx-auto p-6 lg:p-8">
+        {/* Hero Section */}
+        <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
+          transition={{ duration: 0.8 }}
+          className="text-center mb-12"
         >
-          <TodayWorkout />
-        </motion.div>
+          <div className="flex justify-center mb-6">
+            <Logo variant="full" size="xl" />
+          </div>
+
+          <h1 className="text-4xl lg:text-5xl font-bold text-text-primary mb-4">
+            Transform Your Fitness with{' '}
+            <span className="bg-gradient-to-r from-teal-400 to-purple-600 bg-clip-text text-transparent">
+              AI-Powered Workouts
+            </span>
+          </h1>
+
+          <p className="text-lg lg:text-xl text-text-muted mb-8 max-w-3xl mx-auto">
+            Get personalized chair yoga and calisthenics routines tailored to your fitness level,
+            goals, and preferences. Start your journey to better mobility, strength, and wellness.
+          </p>
+
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button
+              size="lg"
+              className="bg-gradient-to-r from-teal-400 to-purple-600 hover:from-teal-500 hover:to-purple-700"
+              onClick={() => window.location.href = '/workouts'}
+            >
+              <Play className="mr-2 h-5 w-5" />
+              Start Your Journey
+            </Button>
+            <Button
+              variant="outline"
+              size="lg"
+              onClick={() => window.location.href = '/analytics'}
+            >
+              <BarChart3 className="mr-2 h-5 w-5" />
+              View Progress
+            </Button>
+          </div>
+        </motion.section>
 
         {/* Quick Stats */}
-        <motion.div
+        <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
+          transition={{ duration: 0.8, delay: 0.1 }}
+          className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12"
         >
-          <DashboardStats />
-        </motion.div>
+          <Card className="bg-gradient-to-br from-teal-400/10 to-teal-600/10 border-teal-400/20">
+            <CardContent className="p-4 text-center">
+              <Activity className="h-6 w-6 mx-auto mb-2 text-teal-400" />
+              <div className="text-2xl font-bold text-text-primary">47</div>
+              <div className="text-sm text-text-muted">Workouts</div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-purple-400/10 to-purple-600/10 border-purple-400/20">
+            <CardContent className="p-4 text-center">
+              <Clock className="h-6 w-6 mx-auto mb-2 text-purple-400" />
+              <div className="text-2xl font-bold text-text-primary">1,240</div>
+              <div className="text-sm text-text-muted">Minutes</div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-orange-400/10 to-orange-600/10 border-orange-400/20">
+            <CardContent className="p-4 text-center">
+              <Flame className="h-6 w-6 mx-auto mb-2 text-orange-400" />
+              <div className="text-2xl font-bold text-text-primary">8,920</div>
+              <div className="text-sm text-text-muted">Calories</div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-yellow-400/10 to-yellow-600/10 border-yellow-400/20">
+            <CardContent className="p-4 text-center">
+              <Zap className="h-6 w-6 mx-auto mb-2 text-yellow-400" />
+              <div className="text-2xl font-bold text-text-primary">8</div>
+              <div className="text-sm text-text-muted">Day Streak</div>
+            </CardContent>
+          </Card>
+        </motion.section>
+
+        {/* Features Grid */}
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12"
+        >
+          <BrandCard
+            title="AI-Powered Workouts"
+            icon={<Activity className="h-5 w-5" />}
+            variant="gradient"
+          >
+            <p className="text-text-muted mb-4">
+              Get intelligent workout recommendations based on your fitness level, goals, and progress.
+            </p>
+            <Button
+              variant="ghost"
+              className="w-full"
+              onClick={() => window.location.href = '/ai-generator'}
+            >
+              Explore AI Features
+            </Button>
+          </BrandCard>
+
+          <BrandCard
+            title="Chair Yoga & Calisthenics"
+            icon={<Dumbbell className="h-5 w-5" />}
+            variant="gradient"
+          >
+            <p className="text-text-muted mb-4">
+              Accessible exercises that build strength, flexibility, and mobility from the comfort of your chair.
+            </p>
+            <Button
+              variant="ghost"
+              className="w-full"
+              onClick={() => window.location.href = '/workouts'}
+            >
+              Browse Workouts
+            </Button>
+          </BrandCard>
+
+          <BrandCard
+            title="Progress Tracking"
+            icon={<TrendingUp className="h-5 w-5" />}
+            variant="gradient"
+          >
+            <p className="text-text-muted mb-4">
+              Monitor your fitness journey with detailed analytics and achievement tracking.
+            </p>
+            <Button
+              variant="ghost"
+              className="w-full"
+              onClick={() => window.location.href = '/analytics'}
+            >
+              View Analytics
+            </Button>
+          </BrandCard>
+
+          <BrandCard
+            title="Personalized Goals"
+            icon={<Target className="h-5 w-5" />}
+            variant="gradient"
+          >
+            <p className="text-text-muted mb-4">
+              Set and achieve fitness milestones with AI-driven goal recommendations.
+            </p>
+            <Button
+              variant="ghost"
+              className="w-full"
+              onClick={() => window.location.href = '/goals'}
+            >
+              Set Goals
+            </Button>
+          </BrandCard>
+
+          <BrandCard
+            title="Health Monitoring"
+            icon={<Heart className="h-5 w-5" />}
+            variant="gradient"
+          >
+            <p className="text-text-muted mb-4">
+              Track vital metrics and get insights into your overall health and wellness.
+            </p>
+            <Button variant="ghost" className="w-full">
+              Monitor Health
+            </Button>
+          </BrandCard>
+
+          <BrandCard
+            title="Flexible Scheduling"
+            icon={<Calendar className="h-5 w-5" />}
+            variant="gradient"
+          >
+            <p className="text-text-muted mb-4">
+              Workouts that fit your schedule, from quick 5-minute sessions to comprehensive routines.
+            </p>
+            <Button variant="ghost" className="w-full">
+              Schedule Workout
+            </Button>
+          </BrandCard>
+        </motion.section>
 
         {/* Recent Activity */}
-        <motion.div
+        <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.3 }}
+          transition={{ duration: 0.8, delay: 0.3 }}
+          className="mb-12"
         >
-          <RecentActivity />
-        </motion.div>
-      </motion.div>
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Award className="h-5 w-5" />
+                Recent Achievements
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="flex items-center gap-3 p-3 bg-background-secondary rounded-lg">
+                  <div className="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center">
+                    <CheckCircle className="h-5 w-5 text-green-500" />
+                  </div>
+                  <div>
+                    <div className="font-medium text-text-primary">First Steps</div>
+                    <div className="text-sm text-text-muted">Completed first workout</div>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 p-3 bg-background-secondary rounded-lg">
+                  <div className="w-10 h-10 rounded-full bg-yellow-500/20 flex items-center justify-center">
+                    <Zap className="h-5 w-5 text-yellow-500" />
+                  </div>
+                  <div>
+                    <div className="font-medium text-text-primary">Week Warrior</div>
+                    <div className="text-sm text-text-muted">7 workouts in a week</div>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 p-3 bg-background-secondary rounded-lg">
+                  <div className="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center">
+                    <Clock className="h-5 w-5 text-purple-500" />
+                  </div>
+                  <div>
+                    <div className="font-medium text-text-primary">Time Master</div>
+                    <div className="text-sm text-text-muted">1000+ minutes completed</div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.section>
+
+        {/* Call to Action */}
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.4 }}
+          className="text-center"
+        >
+          <Card className="bg-gradient-to-br from-teal-400/10 to-purple-600/10 border-teal-400/20">
+            <CardContent className="p-8">
+              <h2 className="text-3xl font-bold text-text-primary mb-4">
+                Ready to Transform Your Fitness?
+              </h2>
+              <p className="text-lg text-text-muted mb-6 max-w-2xl mx-auto">
+                Join thousands of users who have already improved their mobility, strength, and overall wellness with Mobii.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Button
+                  size="lg"
+                  className="bg-gradient-to-r from-teal-400 to-purple-600 hover:from-teal-500 hover:to-purple-700"
+                  onClick={() => window.location.href = '/workouts'}
+                >
+                  Get Started Today
+                </Button>
+                <Button variant="outline" size="lg">
+                  Learn More
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.section>
+      </main>
     </div>
   );
 }

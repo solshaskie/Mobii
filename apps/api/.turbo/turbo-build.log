@@ -1,0 +1,29 @@
+
+> @mobii/api@0.1.0 build
+> tsc
+
+src/middleware/auth.ts(20,31): error TS7030: Not all code paths return a value.
+src/middleware/errorHandler.ts(11,39): error TS2694: Namespace '"C:/Users/Ashley/Mobii/node_modules/.prisma/client/default".Prisma' has no exported member 'PrismaClientKnownRequestError'.
+src/middleware/errorHandler.ts(31,31): error TS2339: Property 'PrismaClientKnownRequestError' does not exist on type 'typeof Prisma'.
+src/routes/ai.ts(26,34): error TS7030: Not all code paths return a value.
+src/routes/ai.ts(96,17): error TS7006: Parameter 'ex' implicitly has an 'any' type.
+src/routes/ai.ts(164,45): error TS7006: Parameter 'ex' implicitly has an 'any' type.
+src/routes/ai.ts(227,28): error TS7030: Not all code paths return a value.
+src/routes/ai.ts(281,49): error TS7006: Parameter 'w' implicitly has an 'any' type.
+src/routes/ai.ts(284,61): error TS7006: Parameter 'type' implicitly has an 'any' type.
+src/routes/auth.ts(23,26): error TS7030: Not all code paths return a value.
+src/routes/auth.ts(90,23): error TS7030: Not all code paths return a value.
+src/routes/auth.ts(146,19): error TS7030: Not all code paths return a value.
+src/routes/exercises.ts(68,20): error TS7030: Not all code paths return a value.
+src/routes/exercises.ts(121,34): error TS7006: Parameter 'cat' implicitly has an 'any' type.
+src/routes/exercises.ts(143,38): error TS7006: Parameter 'diff' implicitly has an 'any' type.
+src/routes/exercises.ts(162,23): error TS7006: Parameter 'exercise' implicitly has an 'any' type.
+src/routes/exercises.ts(163,29): error TS7006: Parameter 'tag' implicitly has an 'any' type.
+src/routes/exercises.ts(217,23): error TS7030: Not all code paths return a value.
+src/routes/progress.ts(60,20): error TS7030: Not all code paths return a value.
+npm error Lifecycle script `build` failed with error:
+npm error code 2
+src/routes/progress.ts(106,20): error TS7030: Not all code paths return a value.
+npm error path C:\Users\Ashley\Mobii\apps\api
+src/routes/progress.ts(141,23): error TS7030: Not all code paths return a value.
+npm error workspace @mobii/api@0.1.0

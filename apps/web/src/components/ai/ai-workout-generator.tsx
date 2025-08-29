@@ -14,7 +14,7 @@ import {
   Play,
   Heart,
   Dumbbell,
-  Yoga,
+  Activity,
   Calendar,
   Star,
   ChevronRight,

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { StatusBar, LogBox } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
@@ -22,6 +22,8 @@ import { ThemeProvider } from './components/providers/ThemeProvider';
 import { SensorProvider } from './components/providers/SensorProvider';
 import { AuthProvider } from './components/providers/AuthProvider';
 import { WorkoutProvider } from './components/providers/WorkoutProvider';
+import MobiiIntroScreen from './components/MobiiIntroScreen';
+import Logo from './components/Logo';
 
 // Import theme
 import { theme } from './theme';
@@ -92,6 +94,7 @@ function TabNavigator() {
         headerTitleStyle: {
           fontWeight: 'bold',
         },
+        headerTitle: () => <Logo variant="simple" size="sm" />,
       })}
     >
       <Tab.Screen 
@@ -129,10 +132,26 @@ function TabNavigator() {
 }
 
 function App() {
+  const [showIntro, setShowIntro] = useState(true);
+
   useEffect(() => {
     // Hide splash screen after app is ready
     SplashScreen.hide();
   }, []);
+
+  const handleIntroComplete = () => {
+    setShowIntro(false);
+  };
+
+  if (showIntro) {
+    return (
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <SafeAreaProvider>
+          <MobiiIntroScreen onComplete={handleIntroComplete} />
+        </SafeAreaProvider>
+      </GestureHandlerRootView>
+    );
+  }
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>

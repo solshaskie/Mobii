@@ -1,4 +1,38 @@
 {
-  "name": "Mobii",
-  "displayName": "Mobii"
+  "expo": {
+    "name": "Mobii",
+    "slug": "mobii",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/mobii_app_icon.svg",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "image": "./assets/images/mobii_app_icon.svg",
+      "resizeMode": "contain",
+      "backgroundColor": "#2DD4BF"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.mobii.app",
+      "buildNumber": "1.0.0"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/mobii_app_icon.svg",
+        "backgroundColor": "#2DD4BF"
+      },
+      "package": "com.mobii.app",
+      "versionCode": 1
+    },
+    "web": {
+      "favicon": "./assets/images/mobii_app_icon.svg"
+    },
+    "description": "AI-powered personalized workout plans for chair yoga and calisthenics",
+    "keywords": ["fitness", "yoga", "calisthenics", "ai", "workout", "health"],
+    "author": "Mobii Team",
+    "primaryColor": "#2DD4BF"
+  }
 }

@@ -1,0 +1,57 @@
+{
+  "name": "Mobii - Personalized Chair Yoga & Calisthenics",
+  "short_name": "Mobii",
+  "description": "AI-powered personalized workout plans for chair yoga and calisthenics",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#2dd4bf",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "en",
+  "categories": ["fitness", "health", "lifestyle"],
+  "icons": [
+    {
+      "src": "/images/mobii_app_icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/images/mobii_app_icon.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/images/mobii_app_icon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Start Workout",
+      "short_name": "Workout",
+      "description": "Start your daily workout",
+      "url": "/workouts",
+      "icons": [
+        {
+          "src": "/images/mobii_app_icon.svg",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "View Progress",
+      "short_name": "Progress",
+      "description": "Check your fitness progress",
+      "url": "/analytics",
+      "icons": [
+        {
+          "src": "/images/mobii_app_icon.svg",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 100">
+  <defs>
+    <linearGradient id="mobiiGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2DD4BF;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#7C3AED;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <text x="10" y="70" font-family="Poppins, Arial, sans-serif" font-weight="600" font-size="60" fill="url(#mobiiGradient)">Mobii</text>
+  <circle cx="260" cy="50" r="25" stroke="url(#mobiiGradient)" stroke-width="8" fill="none" />
+</svg>

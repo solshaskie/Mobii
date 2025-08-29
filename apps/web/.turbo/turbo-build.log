@@ -1,0 +1,12 @@
+
+> @mobii/web@0.1.0 build
+> next build
+
+ ⚠ Invalid next.config.js options detected: 
+ ⚠     "env.CUSTOM_KEY" is missing, expected string
+ ⚠     Unrecognized key(s) in object: 'appDir' at "experimental"
+ ⚠ See more info here: https://nextjs.org/docs/messages/invalid-next-config
+   ▲ Next.js 14.0.3
+   - Environments: .env.local
+
+   Creating an optimized production build ...
