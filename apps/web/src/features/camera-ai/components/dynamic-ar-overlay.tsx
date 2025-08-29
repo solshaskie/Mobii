@@ -8,26 +8,49 @@ interface DynamicAROverlayProps {
   photoType: string;
   onPositionUpdate?: (isOptimal: boolean, adjustments: string[]) => void;
   className?: string;
+  videoDimensions?: { width: number; height: number };
 }
 
 export const DynamicAROverlay: React.FC<DynamicAROverlayProps> = ({
   videoElement,
   photoType,
   onPositionUpdate,
-  className = ''
+  className = '',
+  videoDimensions
 }) => {
   const [showSkeleton, setShowSkeleton] = useState(true);
+  const [isOptimal, setIsOptimal] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  // Simple test - draw skeleton on canvas
+  // Update position analysis
+  useEffect(() => {
+    // Simulate position analysis - in real implementation this would use pose detection
+    const checkPosition = () => {
+      // For now, assume optimal position after a delay
+      setTimeout(() => {
+        setIsOptimal(true);
+        onPositionUpdate?.(true, ['Perfect position!']);
+      }, 2000);
+    };
+
+    if (videoElement && videoElement.readyState >= 2) {
+      checkPosition();
+    }
+  }, [videoElement, onPositionUpdate]);
+
+  // Draw skeleton on canvas
   useEffect(() => {
     if (showSkeleton && canvasRef.current && videoElement) {
       const canvas = canvasRef.current;
       const ctx = canvas.getContext('2d');
       if (ctx) {
-        // Set canvas size to match video
-        canvas.width = videoElement.videoWidth || videoElement.clientWidth;
-        canvas.height = videoElement.videoHeight || videoElement.clientHeight;
+        // Set canvas size to match video container
+        const container = containerRef.current;
+        if (container) {
+          canvas.width = container.clientWidth;
+          canvas.height = container.clientHeight;
+        }
 
         // Clear canvas
         ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -70,6 +93,7 @@ export const DynamicAROverlay: React.FC<DynamicAROverlayProps> = ({
 
   return (
     <div 
+      ref={containerRef}
       className={`absolute inset-0 pointer-events-none ${className}`} 
       style={{ 
         zIndex: 99999,
@@ -96,7 +120,7 @@ export const DynamicAROverlay: React.FC<DynamicAROverlayProps> = ({
         />
       )}
 
-      {/* Simple X Mark - Always visible */}
+      {/* HUGE WHITE X MARK - Always visible and prominent */}
       <div 
         style={{
           position: 'absolute',
@@ -104,17 +128,51 @@ export const DynamicAROverlay: React.FC<DynamicAROverlayProps> = ({
           left: '50%',
           transform: 'translate(-50%, -50%)',
           zIndex: 99999,
-          fontSize: '4rem',
+          fontSize: '6rem',
           fontWeight: 'bold',
           color: 'white',
-          textShadow: '0 0 20px white, 0 0 40px white, 0 0 60px white',
-          filter: 'drop-shadow(0 0 10px white)'
+          textShadow: '0 0 20px white, 0 0 40px white, 0 0 60px white, 0 0 80px white',
+          filter: 'drop-shadow(0 0 10px white) drop-shadow(0 0 20px white)',
+          animation: 'pulse 2s infinite'
         }}
       >
         ✕
       </div>
 
-      {/* Test Status */}
+      {/* Target Zone - Green border around the X */}
+      <div 
+        style={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: '80px',
+          height: '80px',
+          border: '3px solid #00ff00',
+          backgroundColor: 'rgba(0, 255, 0, 0.1)',
+          borderRadius: '50%',
+          zIndex: 99997,
+          animation: isOptimal ? 'pulse 1s infinite' : 'none'
+        }}
+      />
+
+      {/* Larger Target Area */}
+      <div 
+        style={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: '60%',
+          height: '85%',
+          border: '2px dashed #00ff00',
+          backgroundColor: 'rgba(0, 255, 0, 0.05)',
+          borderRadius: '8px',
+          zIndex: 99996
+        }}
+      />
+
+      {/* Status Indicators */}
       <div 
         style={{
           position: 'absolute',
@@ -122,13 +180,23 @@ export const DynamicAROverlay: React.FC<DynamicAROverlayProps> = ({
           left: '10px',
           backgroundColor: 'rgba(0, 0, 0, 0.8)',
           color: 'white',
-          padding: '8px',
+          padding: '8px 12px',
           borderRadius: '4px',
           fontSize: '12px',
-          zIndex: 99999
+          zIndex: 99999,
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px'
         }}
       >
-        Overlay Active
+        <div style={{ 
+          width: '8px', 
+          height: '8px', 
+          borderRadius: '50%', 
+          backgroundColor: isOptimal ? '#00ff00' : '#ffaa00',
+          animation: isOptimal ? 'pulse 1s infinite' : 'none'
+        }} />
+        {isOptimal ? 'Position: Optimal' : 'Position: Adjusting...'}
       </div>
 
       {/* Skeleton Toggle */}
@@ -140,32 +208,54 @@ export const DynamicAROverlay: React.FC<DynamicAROverlayProps> = ({
           right: '10px',
           backgroundColor: 'rgba(0, 0, 0, 0.8)',
           color: 'white',
-          padding: '8px',
+          padding: '8px 12px',
           borderRadius: '4px',
           fontSize: '12px',
           zIndex: 99999,
           border: 'none',
-          cursor: 'pointer'
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '4px'
         }}
       >
+        <div style={{ 
+          width: '8px', 
+          height: '8px', 
+          borderRadius: '50%', 
+          backgroundColor: showSkeleton ? '#00ff00' : '#666' 
+        }} />
         Skeleton: {showSkeleton ? 'ON' : 'OFF'}
       </button>
 
-      {/* Target Zone */}
+      {/* Instructions */}
       <div 
         style={{
           position: 'absolute',
-          top: '50%',
+          bottom: '60px',
           left: '50%',
-          transform: 'translate(-50%, -50%)',
-          width: '60%',
-          height: '85%',
-          border: '2px dashed #00ff00',
-          backgroundColor: 'rgba(0, 255, 0, 0.1)',
-          borderRadius: '8px',
-          zIndex: 99997
+          transform: 'translateX(-50%)',
+          backgroundColor: 'rgba(0, 0, 0, 0.8)',
+          color: 'white',
+          padding: '8px 16px',
+          borderRadius: '20px',
+          fontSize: '14px',
+          zIndex: 99999,
+          textAlign: 'center',
+          maxWidth: '80%'
         }}
-      />
+      >
+        Stand on the X mark • 6-8 feet from camera • Say "ready" when positioned
+      </div>
+
+      {/* CSS Animation for pulse effect */}
+      <style jsx>{`
+        @keyframes pulse {
+          0% { opacity: 1; }
+          50% { opacity: 0.7; }
+          100% { opacity: 1; }
+        }
+      `}</style>
     </div>
   );
 };

@@ -127,6 +127,8 @@ export const AutomatedPhotoCapture: React.FC<AutomatedPhotoCaptureProps> = ({
   const [showPreview, setShowPreview] = useState(false);
   const [previewPhoto, setPreviewPhoto] = useState<CapturedPhoto | null>(null);
   const [countdown, setCountdown] = useState<number | null>(null);
+  const [cameraError, setCameraError] = useState<string | null>(null);
+  const [videoDimensions, setVideoDimensions] = useState({ width: 0, height: 0 });
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -308,10 +310,11 @@ export const AutomatedPhotoCapture: React.FC<AutomatedPhotoCaptureProps> = ({
     }, 1000);
   };
 
-  // Start camera
+  // Start camera with improved error handling and setup
   const startCamera = async () => {
     try {
       console.log('Starting camera...');
+      setCameraError(null);
       
       // Check if getUserMedia is supported
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
@@ -331,7 +334,7 @@ export const AutomatedPhotoCapture: React.FC<AutomatedPhotoCaptureProps> = ({
 
       // Wait for video ref to be available
       let attempts = 0;
-      const maxAttempts = 10;
+      const maxAttempts = 20; // Increased attempts
       
       while (!videoRef.current && attempts < maxAttempts) {
         console.log(`Waiting for video ref... attempt ${attempts + 1}`);
@@ -343,28 +346,49 @@ export const AutomatedPhotoCapture: React.FC<AutomatedPhotoCaptureProps> = ({
         console.log('Video ref found, setting stream...');
         videoRef.current.srcObject = stream;
         streamRef.current = stream;
-        setIsCameraActive(true);
         
-        // Wait for video to load
+        // Set up video event listeners
         videoRef.current.onloadedmetadata = () => {
           console.log('Video metadata loaded');
-          console.log('Video dimensions:', videoRef.current?.videoWidth, 'x', videoRef.current?.videoHeight);
+          if (videoRef.current) {
+            const width = videoRef.current.videoWidth;
+            const height = videoRef.current.videoHeight;
+            console.log('Video dimensions:', width, 'x', height);
+            setVideoDimensions({ width, height });
+          }
+        };
+        
+        videoRef.current.oncanplay = () => {
+          console.log('Video can play');
         };
         
         videoRef.current.onplay = () => {
           console.log('Video started playing');
+          setIsCameraActive(true);
         };
         
         videoRef.current.onerror = (error) => {
           console.error('Video error:', error);
+          setCameraError('Video playback error occurred');
         };
 
-        // Force play the video
-        try {
-          await videoRef.current.play();
-          console.log('Video play() successful');
-        } catch (playError) {
-          console.error('Error playing video:', playError);
+        // Force play the video with retry logic
+        let playAttempts = 0;
+        const maxPlayAttempts = 3;
+        
+        while (playAttempts < maxPlayAttempts) {
+          try {
+            await videoRef.current.play();
+            console.log('Video play() successful');
+            break;
+          } catch (playError) {
+            console.error(`Error playing video (attempt ${playAttempts + 1}):`, playError);
+            playAttempts++;
+            if (playAttempts >= maxPlayAttempts) {
+              throw new Error('Failed to start video playback after multiple attempts');
+            }
+            await new Promise(resolve => setTimeout(resolve, 500));
+          }
         }
       } else {
         console.error('Video ref is still null after waiting');
@@ -372,7 +396,8 @@ export const AutomatedPhotoCapture: React.FC<AutomatedPhotoCaptureProps> = ({
       }
     } catch (error) {
       console.error('Error accessing camera:', error);
-      alert(`Unable to access camera: ${error.message}. Please check permissions.`);
+      setCameraError(`Unable to access camera: ${error.message}. Please check permissions.`);
+      alert(`Camera Error: ${error.message}. Please check camera permissions and try again.`);
     }
   };
 
@@ -522,6 +547,8 @@ export const AutomatedPhotoCapture: React.FC<AutomatedPhotoCaptureProps> = ({
     }
     setCountdown(null);
     setIsListening(false);
+    setIsCameraActive(false);
+    setCameraError(null);
     if (onCancel) {
       onCancel();
     }
@@ -661,6 +688,7 @@ export const AutomatedPhotoCapture: React.FC<AutomatedPhotoCaptureProps> = ({
                 playsInline
                 muted
                 className="w-full h-96 object-cover"
+                style={{ minHeight: '384px' }}
               />
               
               {/* Camera Status Indicator */}
@@ -695,14 +723,46 @@ export const AutomatedPhotoCapture: React.FC<AutomatedPhotoCaptureProps> = ({
               </div>
 
               {/* Dynamic AR Overlay with Real-time Body Tracking - INSIDE the video container */}
-              {session && (
+              {session && isCameraActive && videoRef.current && (
                 <DynamicAROverlay
                   videoElement={videoRef.current}
                   photoType={session.currentStep.type}
                   onPositionUpdate={handlePositionUpdate}
+                  videoDimensions={videoDimensions}
                 />
               )}
             </div>
+            
+            {/* Camera Error Display */}
+            {cameraError && (
+              <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                <div className="text-sm text-red-800">
+                  <strong>Camera Error:</strong> {cameraError}
+                </div>
+                <Button 
+                  onClick={startCamera} 
+                  variant="outline" 
+                  size="sm" 
+                  className="mt-2"
+                >
+                  Retry Camera
+                </Button>
+              </div>
+            )}
+            
+            {/* Position Status */}
+            {isCameraActive && (
+              <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <div className="text-sm text-blue-800">
+                  <strong>Position Status:</strong> {isOptimalPosition ? 'Optimal' : 'Needs Adjustment'}
+                </div>
+                {positionAdjustments.length > 0 && (
+                  <div className="mt-2 text-xs text-blue-600">
+                    {positionAdjustments[0]}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
