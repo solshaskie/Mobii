@@ -1,4 +1,5 @@
-import OpenAI from 'openai';
+// Remove OpenAI import and replace with local analysis
+// import OpenAI from 'openai';
 import { 
   MovementFrame, 
   ExercisePattern, 
@@ -8,20 +9,22 @@ import {
 } from '../types';
 
 export class MovementAnalysisService {
-  private openai: OpenAI;
+  // Remove OpenAI dependency
+  // private openai: OpenAI;
 
   constructor() {
-    this.openai = new OpenAI({
-      apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY,
-    });
+    // Remove OpenAI initialization
+    // this.openai = new OpenAI({
+    //   apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY,
+    // });
   }
 
   /**
-   * Analyze a video and extract exercise movements
+   * Analyze a video and extract exercise movements (mock implementation)
    */
   async analyzeVideoMovement(videoUrl: string): Promise<AIWorkoutAnalysis> {
     try {
-      console.log('🔍 Starting AI movement analysis...');
+      console.log('🔍 Starting movement analysis...');
       
       // Step 1: Extract movement frames (simulated)
       const movementFrames = await this.extractMovementFrames(videoUrl);
@@ -32,7 +35,7 @@ export class MovementAnalysisService {
       // Step 3: Create workout analysis
       const workoutAnalysis = await this.createWorkoutAnalysis(exercisePatterns);
       
-      console.log('✅ AI movement analysis completed!');
+      console.log('✅ Movement analysis completed!');
       return workoutAnalysis;
     } catch (error) {
       console.error('❌ Error analyzing video movement:', error);
@@ -41,7 +44,7 @@ export class MovementAnalysisService {
   }
 
   /**
-   * Extract movement frames from video using pose detection
+   * Extract movement frames from video using pose detection (mock implementation)
    */
   private async extractMovementFrames(videoUrl: string): Promise<MovementFrame[]> {
     console.log('📹 Extracting movement frames...');
@@ -62,88 +65,94 @@ export class MovementAnalysisService {
   }
 
   /**
-   * Identify exercise patterns from movement frames
+   * Identify exercise patterns from movement frames (mock implementation)
    */
   private async identifyExercisePatterns(frames: MovementFrame[]): Promise<ExercisePattern[]> {
     console.log('🧠 Identifying exercise patterns...');
     
-    // Use AI to analyze movement patterns
-    const prompt = `
-    Analyze these movement frames and identify the exercises being performed.
-    Consider joint angles, movement patterns, and exercise characteristics.
+    // Mock exercise patterns instead of using AI
+    const mockPatterns: ExercisePattern[] = [
+      {
+        id: 'exercise_1',
+        name: 'Chair Squats',
+        category: 'strength-training',
+        movementSequence: this.createMockMovementSequences(frames.slice(0, 30)),
+        keyFrames: this.createMockKeyFrames([frames[5], frames[15], frames[25]]),
+        difficulty: 'beginner',
+        targetMuscles: ['quads', 'glutes', 'hamstrings'],
+        equipment: ['chair'],
+        variations: ['Single leg squats', 'Pulse squats'],
+        safetyNotes: ['Keep chest up', 'Don\'t let knees go past toes'],
+        commonMistakes: ['Knees going past toes', 'Not engaging core'],
+        formCues: ['Keep chest up', 'Engage core']
+      },
+      {
+        id: 'exercise_2',
+        name: 'Seated Shoulder Press',
+        category: 'strength-training',
+        movementSequence: this.createMockMovementSequences(frames.slice(30, 60)),
+        keyFrames: this.createMockKeyFrames([frames[35], frames[45], frames[55]]),
+        difficulty: 'intermediate',
+        targetMuscles: ['shoulders', 'triceps'],
+        equipment: ['dumbbells'],
+        variations: ['Arnold press', 'Military press'],
+        safetyNotes: ['Keep core engaged', 'Don\'t arch back'],
+        commonMistakes: ['Arching back', 'Not controlling movement'],
+        formCues: ['Keep core engaged', 'Control the movement']
+      },
+      {
+        id: 'exercise_3',
+        name: 'Seated Spinal Twist',
+        category: 'flexibility',
+        movementSequence: this.createMockMovementSequences(frames.slice(60, 90)),
+        keyFrames: this.createMockKeyFrames([frames[65], frames[75], frames[85]]),
+        difficulty: 'beginner',
+        targetMuscles: ['core', 'back'],
+        equipment: ['chair'],
+        variations: ['Deep twist', 'Pulse twist'],
+        safetyNotes: ['Keep hips facing forward', 'Don\'t force the twist'],
+        commonMistakes: ['Moving hips', 'Forcing the twist'],
+        formCues: ['Keep hips facing forward', 'Breathe deeply']
+      }
+    ];
     
-    Provide a JSON response with:
-    - exercises: array of exercise objects with name, category, difficulty, targetMuscles, equipment
-    - confidence: confidence level for each exercise
-    - variations: possible variations of each exercise
-    `;
-
-    try {
-      const response = await this.openai.chat.completions.create({
-        model: "gpt-4",
-        messages: [{ role: "user", content: prompt }],
-        temperature: 0.3,
-      });
-
-      const result = JSON.parse(response.choices[0].message.content || '{}');
-      
-      // Convert to ExercisePattern objects
-      const patterns: ExercisePattern[] = (result.exercises || []).map((ex: any) => ({
-        id: `exercise_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-        name: ex.name || 'Unknown Exercise',
-        category: ex.category || 'functional',
-        movementSequence: [],
-        keyFrames: [],
-        difficulty: ex.difficulty || 'intermediate',
-        targetMuscles: ex.targetMuscles || ['full body'],
-        equipment: ex.equipment || [],
-        variations: ex.variations || [],
-        safetyNotes: ['Maintain proper form'],
-        commonMistakes: ['Poor posture'],
-        formCues: ['Keep core engaged']
-      }));
-
-      return patterns;
-    } catch (error) {
-      console.error('Error identifying exercise patterns:', error);
-      return this.getFallbackPatterns();
-    }
+    return mockPatterns;
   }
 
   /**
-   * Create workout analysis from exercise patterns
+   * Create comprehensive workout analysis (mock implementation)
    */
   private async createWorkoutAnalysis(patterns: ExercisePattern[]): Promise<AIWorkoutAnalysis> {
     console.log('📊 Creating workout analysis...');
     
-    const exercises: DetectedExercise[] = patterns.map((pattern, index) => ({
+    const detectedExercises: DetectedExercise[] = patterns.map((pattern, index) => ({
       id: pattern.id,
       name: pattern.name,
-      confidence: 0.85,
-      startTime: index * 60000,
+      confidence: 0.85 + Math.random() * 0.1,
+      startTime: index * 60000, // 1 minute intervals
       endTime: (index + 1) * 60000,
-      repetitions: 8 + Math.floor(Math.random() * 4),
-      sets: 1,
-      restPeriods: [30000],
-      formQuality: 0.8,
+      repetitions: Math.floor(Math.random() * 10) + 5,
+      sets: Math.floor(Math.random() * 3) + 1,
+      restPeriods: [30000], // 30 seconds rest
+      formQuality: 0.85 + Math.random() * 0.1,
       variations: pattern.variations,
       modifications: []
     }));
 
     const analysis: AIWorkoutAnalysis = {
       videoId: `video_${Date.now()}`,
-      exercises,
+      exercises: detectedExercises,
       workoutStructure: {
-        warmup: exercises.slice(0, 2),
-        mainWorkout: exercises.slice(2, -2),
-        cooldown: exercises.slice(-2),
+        warmup: detectedExercises.slice(0, 1),
+        mainWorkout: detectedExercises.slice(1, -1),
+        cooldown: detectedExercises.slice(-1),
         transitions: []
       },
-      difficulty: this.calculateOverallDifficulty(patterns),
-      totalDuration: exercises.length * 60000,
-      estimatedCalories: exercises.length * 50,
-      targetMuscleGroups: this.extractTargetMuscles(patterns),
-      equipment: this.extractEquipment(patterns),
+      difficulty: this.calculateOverallDifficulty(detectedExercises),
+      totalDuration: detectedExercises.length * 60000,
+      estimatedCalories: detectedExercises.length * 50,
+      targetMuscleGroups: this.getUniqueTargetMuscles(detectedExercises),
+      equipment: this.getUniqueEquipment(detectedExercises),
       safetyAssessment: {
         riskLevel: 'low',
         concerns: [],
@@ -163,61 +172,30 @@ export class MovementAnalysisService {
   }
 
   /**
-   * Provide real-time form feedback
+   * Generate mock pose landmarks
    */
-  async provideRealTimeFeedback(currentFrame: MovementFrame, targetPattern: ExercisePattern): Promise<any[]> {
-    // Analyze current form against target pattern
-    const feedback = [];
-    
-    // Check joint angles, posture, etc.
-    const formCheck = this.checkFormQuality(currentFrame);
-    
-    if (formCheck.score < 0.7) {
-      feedback.push({
-        timestamp: currentFrame.timestamp,
-        feedbackType: 'form',
-        message: formCheck.correction,
-        urgency: 'high'
-      });
-    }
-    
-    return feedback;
-  }
-
-  /**
-   * Learn from user performance and improve recommendations
-   */
-  async learnFromPerformance(userData: any, workoutAnalysis: AIWorkoutAnalysis): Promise<any> {
-    console.log('🧠 Learning from user performance...');
-    
-    // Analyze performance patterns
-    const insights = await this.analyzePerformancePatterns(userData);
-    
-    // Generate improved recommendations
-    const recommendations = await this.generateImprovedRecommendations(insights, workoutAnalysis);
-    
-    return recommendations;
-  }
-
-  // Helper methods
   private generateMockLandmarks(frameIndex: number): any {
+    // Simulate pose landmarks
     return {
-      nose: { x: 0.5, y: 0.2, z: 0, visibility: 1 },
-      leftShoulder: { x: 0.4, y: 0.3, z: 0, visibility: 1 },
-      rightShoulder: { x: 0.6, y: 0.3, z: 0, visibility: 1 },
-      leftElbow: { x: 0.3, y: 0.5, z: 0, visibility: 1 },
-      rightElbow: { x: 0.7, y: 0.5, z: 0, visibility: 1 },
-      leftWrist: { x: 0.2, y: 0.7, z: 0, visibility: 1 },
-      rightWrist: { x: 0.8, y: 0.7, z: 0, visibility: 1 },
-      leftHip: { x: 0.4, y: 0.6, z: 0, visibility: 1 },
-      rightHip: { x: 0.6, y: 0.6, z: 0, visibility: 1 },
-      leftKnee: { x: 0.4, y: 0.8, z: 0, visibility: 1 },
-      rightKnee: { x: 0.6, y: 0.8, z: 0, visibility: 1 },
-      leftAnkle: { x: 0.4, y: 0.95, z: 0, visibility: 1 },
-      rightAnkle: { x: 0.6, y: 0.95, z: 0, visibility: 1 }
+      nose: { x: 0.5 + Math.sin(frameIndex * 0.1) * 0.1, y: 0.2, confidence: 0.9 },
+      leftShoulder: { x: 0.4, y: 0.3, confidence: 0.85 },
+      rightShoulder: { x: 0.6, y: 0.3, confidence: 0.85 },
+      leftElbow: { x: 0.35, y: 0.5, confidence: 0.8 },
+      rightElbow: { x: 0.65, y: 0.5, confidence: 0.8 },
+      leftWrist: { x: 0.3, y: 0.7, confidence: 0.75 },
+      rightWrist: { x: 0.7, y: 0.7, confidence: 0.75 },
+      leftHip: { x: 0.45, y: 0.6, confidence: 0.9 },
+      rightHip: { x: 0.55, y: 0.6, confidence: 0.9 },
+      leftKnee: { x: 0.4, y: 0.8, confidence: 0.85 },
+      rightKnee: { x: 0.6, y: 0.8, confidence: 0.85 },
+      leftAnkle: { x: 0.35, y: 0.95, confidence: 0.8 },
+      rightAnkle: { x: 0.65, y: 0.95, confidence: 0.8 }
     };
   }
 
+  /**
+   * Determine exercise phase based on frame index
+   */
   private determineExercisePhase(frameIndex: number): 'preparation' | 'execution' | 'recovery' | 'rest' {
     const cycle = frameIndex % 100;
     if (cycle < 20) return 'preparation';
@@ -226,82 +204,59 @@ export class MovementAnalysisService {
     return 'rest';
   }
 
-  private getFallbackPatterns(): ExercisePattern[] {
+  /**
+   * Calculate overall difficulty based on exercises
+   */
+  private calculateOverallDifficulty(exercises: DetectedExercise[]): 'beginner' | 'intermediate' | 'advanced' {
+    // Mock difficulty calculation
+    const avgFormQuality = exercises.reduce((sum, ex) => sum + ex.formQuality, 0) / exercises.length;
+    
+    if (avgFormQuality >= 0.8) return 'advanced';
+    if (avgFormQuality >= 0.6) return 'intermediate';
+    return 'beginner';
+  }
+
+  /**
+   * Get unique target muscles from exercises (mock implementation)
+   */
+  private getUniqueTargetMuscles(exercises: DetectedExercise[]): string[] {
+    // Mock target muscles since DetectedExercise doesn't have targetMuscles
+    return ['quads', 'glutes', 'core', 'shoulders'];
+  }
+
+  /**
+   * Get unique equipment from exercises (mock implementation)
+   */
+  private getUniqueEquipment(exercises: DetectedExercise[]): string[] {
+    // Mock equipment since DetectedExercise doesn't have equipment
+    return ['chair', 'dumbbells'];
+  }
+
+  /**
+   * Create mock movement sequences
+   */
+  private createMockMovementSequences(frames: MovementFrame[]): any[] {
     return [{
-      id: 'fallback_exercise',
-      name: 'General Movement',
-      category: 'functional',
-      movementSequence: [],
-      keyFrames: [],
-      difficulty: 'intermediate',
-      targetMuscles: ['full body'],
-      equipment: [],
-      variations: [],
-      safetyNotes: ['Maintain proper form'],
-      commonMistakes: ['Poor posture'],
-      formCues: ['Keep core engaged']
+      id: 'seq_1',
+      name: 'Movement Sequence',
+      startFrame: 0,
+      endFrame: frames.length - 1,
+      keyPoints: [],
+      movementType: 'squat',
+      intensity: 0.7,
+      duration: frames.length * 100
     }];
   }
 
-  private calculateOverallDifficulty(patterns: ExercisePattern[]): 'beginner' | 'intermediate' | 'advanced' {
-    const difficulties = patterns.map(p => {
-      switch (p.difficulty) {
-        case 'beginner': return 1;
-        case 'intermediate': return 2;
-        case 'advanced': return 3;
-        default: return 2;
-      }
-    });
-    
-    const avgDifficulty = difficulties.reduce((a, b) => a + b, 0) / difficulties.length;
-    
-    if (avgDifficulty < 1.5) return 'beginner';
-    if (avgDifficulty < 2.5) return 'intermediate';
-    return 'advanced';
-  }
-
-  private extractTargetMuscles(patterns: ExercisePattern[]): string[] {
-    const muscles = new Set<string>();
-    patterns.forEach(p => p.targetMuscles.forEach(m => muscles.add(m)));
-    return Array.from(muscles);
-  }
-
-  private extractEquipment(patterns: ExercisePattern[]): string[] {
-    const equipment = new Set<string>();
-    patterns.forEach(p => p.equipment.forEach(e => equipment.add(e)));
-    return Array.from(equipment);
-  }
-
-  private checkFormQuality(frame: MovementFrame): { score: number; correction: string } {
-    // Simulate form quality check
-    const score = 0.7 + Math.random() * 0.3;
-    return {
-      score,
-      correction: score < 0.8 ? 'Maintain proper posture and engage core' : 'Good form!'
-    };
-  }
-
-  private async analyzePerformancePatterns(userData: any): Promise<any> {
-    // Analyze user performance patterns
-    return {
-      strengths: ['Good endurance', 'Consistent form'],
-      areasForImprovement: ['Speed', 'Range of motion'],
-      recommendations: ['Increase intensity gradually', 'Focus on full range of motion']
-    };
-  }
-
-  private async generateImprovedRecommendations(insights: any, workoutAnalysis: AIWorkoutAnalysis): Promise<any> {
-    // Generate improved recommendations based on performance insights
-    return {
-      modifiedExercises: workoutAnalysis.exercises.map(ex => ({
-        ...ex,
-        modifications: insights.recommendations
-      })),
-      progression: ['Increase repetitions', 'Add resistance', 'Improve form'],
-      alternatives: ['Similar exercises with different focus']
-    };
+  /**
+   * Create mock key frames
+   */
+  private createMockKeyFrames(frames: MovementFrame[]): any[] {
+    return frames.map((frame, index) => ({
+      timestamp: frame.timestamp,
+      landmarks: frame.landmarks,
+      description: `Key frame ${index + 1}`,
+      formCheckpoints: []
+    }));
   }
 }
-
-// Create singleton instance
-export const movementAnalysisService = new MovementAnalysisService();

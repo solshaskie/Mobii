@@ -1,6 +1,7 @@
 'use client';
 
-import OpenAI from 'openai';
+// Remove OpenAI and other API dependencies
+// import OpenAI from 'openai';
 import { 
   YouTubeVideoInfo, 
   VideoTranscript, 
@@ -10,52 +11,37 @@ import {
 } from '../types';
 
 class YouTubeSummarizationService {
-  private openai: OpenAI;
-  private youtubeApiKey: string;
-  private elevenLabsApiKey: string;
+  // Remove API dependencies
+  // private openai: OpenAI;
+  // private youtubeApiKey: string;
+  // private elevenLabsApiKey: string;
 
   constructor() {
-    this.openai = new OpenAI({
-      apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY,
-      dangerouslyAllowBrowser: true,
-    });
-    this.youtubeApiKey = process.env.NEXT_PUBLIC_YOUTUBE_API_KEY || '';
-    this.elevenLabsApiKey = process.env.NEXT_PUBLIC_ELEVEN_LABS_API_KEY || '';
+    // Remove API initialization
+    // this.openai = new OpenAI({
+    //   apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY,
+    //   dangerouslyAllowBrowser: true,
+    // });
+    // this.youtubeApiKey = process.env.NEXT_PUBLIC_YOUTUBE_API_KEY || '';
+    // this.elevenLabsApiKey = process.env.NEXT_PUBLIC_ELEVEN_LABS_API_KEY || '';
   }
 
-  // Extract video information from YouTube API
+  // Extract video information from YouTube API (mock implementation)
   async getVideoInfo(videoId: string): Promise<YouTubeVideoInfo> {
-    try {
-      const response = await fetch(
-        `https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics,contentDetails&id=${videoId}&key=${this.youtubeApiKey}`
-      );
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch video information');
-      }
+    // Mock video info instead of using YouTube API
+    const mockVideoInfo: YouTubeVideoInfo = {
+      videoId,
+      title: "Chair Yoga for Beginners - Complete 15 Minute Session",
+      description: "A gentle chair yoga session perfect for beginners. This 15-minute workout focuses on flexibility, breathing, and mindfulness.",
+      duration: "PT15M30S",
+      thumbnail: "https://img.youtube.com/vi/dQw4w9WgXcQ/hqdefault.jpg",
+      channelTitle: "Mobii Fitness",
+      publishedAt: "2024-01-15T10:00:00Z",
+      viewCount: "125000",
+      likeCount: "8500"
+    };
 
-      const data = await response.json();
-      const video = data.items[0];
-
-      if (!video) {
-        throw new Error('Video not found');
-      }
-
-      return {
-        videoId,
-        title: video.snippet.title,
-        description: video.snippet.description,
-        duration: video.contentDetails.duration,
-        thumbnail: video.snippet.thumbnails.high.url,
-        channelTitle: video.snippet.channelTitle,
-        publishedAt: video.snippet.publishedAt,
-        viewCount: video.statistics.viewCount,
-        likeCount: video.statistics.likeCount,
-      };
-    } catch (error) {
-      console.error('Error fetching video info:', error);
-      throw error;
-    }
+    return mockVideoInfo;
   }
 
   // Extract transcript from YouTube video (mock implementation)
@@ -91,267 +77,175 @@ class YouTubeSummarizationService {
         start: 23,
         duration: 5,
         confidence: 0.91
+      },
+      {
+        text: "Slowly tilt your head to the right, hold for three breaths.",
+        start: 28,
+        duration: 6,
+        confidence: 0.89
+      },
+      {
+        text: "Now tilt to the left side, feeling the stretch in your neck.",
+        start: 34,
+        duration: 6,
+        confidence: 0.90
+      },
+      {
+        text: "Let's do some seated spinal twists to improve flexibility.",
+        start: 40,
+        duration: 8,
+        confidence: 0.93
+      },
+      {
+        text: "Place your right hand on your left knee and twist gently.",
+        start: 48,
+        duration: 7,
+        confidence: 0.87
+      },
+      {
+        text: "Hold this position for three deep breaths.",
+        start: 55,
+        duration: 5,
+        confidence: 0.92
       }
     ];
 
     return mockTranscript;
   }
 
-  // Generate AI summary and workout instructions
-  async generateSummary(transcript: VideoTranscript[], videoInfo: YouTubeVideoInfo): Promise<VideoSummary> {
-    try {
-      const transcriptText = transcript.map(t => t.text).join(' ');
-      
-      const prompt = `
-You are a professional fitness trainer. Analyze this YouTube video transcript and create a workout summary.
+  // Generate AI summary and workout instructions (mock implementation)
+  async generateSummary(transcript: VideoTranscript[]): Promise<VideoSummary> {
+    // Mock summary instead of using AI
+    const mockSummary: VideoSummary = {
+      title: "Chair Yoga for Beginners",
+      summary: "This 15-minute chair yoga session focuses on gentle stretching, breathing exercises, and mindfulness. Perfect for beginners or those with limited mobility.",
+      keyPoints: [
+        "Gentle shoulder and neck stretches",
+        "Breathing exercises for relaxation",
+        "Seated spinal twists for flexibility",
+        "Mindful movement and body awareness"
+      ],
+      difficulty: "beginner",
+      duration: "15 minutes",
+      equipment: ["chair"],
+      targetMuscles: ["neck", "shoulders", "back", "core"]
+    };
 
-Video Title: ${videoInfo.title}
-Transcript: ${transcriptText}
-
-Provide a JSON response with:
-- summary: 2-3 sentence summary
-- keyPoints: 3-5 key points
-- exerciseInstructions: step-by-step instructions
-- difficulty: beginner/intermediate/advanced
-- duration: estimated minutes
-- calories: estimated calories
-- targetMuscles: muscle groups targeted
-- equipment: equipment needed
-- safetyNotes: safety considerations
-`;
-
-      const completion = await this.openai.chat.completions.create({
-        model: 'gpt-4',
-        messages: [
-          {
-            role: 'system',
-            content: 'You are a professional fitness trainer. Provide accurate, safe exercise instructions.'
-          },
-          {
-            role: 'user',
-            content: prompt
-          }
-        ],
-        temperature: 0.7,
-        max_tokens: 2000,
-      });
-
-      const response = completion.choices[0]?.message?.content;
-      
-      if (!response) {
-        throw new Error('No response from OpenAI');
-      }
-
-      let summaryData;
-      try {
-        summaryData = JSON.parse(response);
-      } catch (error) {
-        console.error('Failed to parse OpenAI response:', response);
-        throw new Error('Invalid response format from AI');
-      }
-
-      return {
-        summary: summaryData.summary || 'A comprehensive workout session',
-        keyPoints: summaryData.keyPoints || ['Focus on form', 'Breathe steadily', 'Listen to your body'],
-        exerciseInstructions: summaryData.exerciseInstructions || ['Start with warm-up', 'Follow the instructor', 'Cool down properly'],
-        difficulty: summaryData.difficulty || 'beginner',
-        duration: summaryData.duration || 15,
-        calories: summaryData.calories || 120,
-        targetMuscles: summaryData.targetMuscles || ['Full body'],
-        equipment: summaryData.equipment || ['Chair'],
-        safetyNotes: summaryData.safetyNotes || ['Stop if you feel pain', 'Modify as needed'],
-      };
-    } catch (error) {
-      console.error('Error generating summary:', error);
-      throw error;
-    }
+    return mockSummary;
   }
 
-  // Generate AI narration
-  async generateNarration(summary: VideoSummary, voiceId: string = 'alloy'): Promise<AINarration> {
-    try {
-      const narrationText = `
-Welcome to your AI-narrated workout session. ${summary.summary}
+  // Generate AI narration (mock implementation)
+  async generateNarration(summary: VideoSummary): Promise<AINarration> {
+    // Mock narration instead of using AI
+    const mockNarration: AINarration = {
+      script: [
+        "Welcome to your chair yoga session. Let's begin with some gentle breathing.",
+        "Take a deep breath in through your nose, filling your lungs completely.",
+        "Now exhale slowly through your mouth, releasing any tension.",
+        "Let's start with shoulder rolls. Roll your shoulders forward in a circular motion.",
+        "Now roll them backward, feeling the movement in your upper back.",
+        "Great! Now let's do some neck stretches. Tilt your head gently to the right.",
+        "Hold this position for three breaths, feeling the stretch in your neck.",
+        "Now tilt to the left side, maintaining the same gentle pressure.",
+        "Let's move to spinal twists. Place your right hand on your left knee.",
+        "Twist your torso to the left, looking over your shoulder.",
+        "Hold this position for three deep breaths.",
+        "Now switch sides, placing your left hand on your right knee.",
+        "Twist to the right and hold for three breaths.",
+        "Excellent work! Let's finish with some gentle breathing.",
+        "Take three more deep breaths, feeling the benefits of your practice."
+      ],
+      audioUrl: null, // No audio generation without API
+      duration: 180 // 3 minutes
+    };
 
-Key points: ${summary.keyPoints.join('. ')}
-
-Exercise instructions:
-${summary.exerciseInstructions.map((instruction, index) => 
-  `Step ${index + 1}: ${instruction}`
-).join('\n')}
-
-Safety notes: ${summary.safetyNotes.join('. ')}
-
-This workout targets: ${summary.targetMuscles.join(', ')}.
-Duration: ${summary.duration} minutes.
-Calories: approximately ${summary.calories}.
-
-Let's get started!
-      `.trim();
-
-      let audioUrl;
-      if (this.elevenLabsApiKey) {
-        audioUrl = await this.generateAudio(narrationText, voiceId);
-      }
-
-      return {
-        narrationText,
-        audioUrl,
-        duration: summary.duration * 60,
-        voiceId,
-      };
-    } catch (error) {
-      console.error('Error generating narration:', error);
-      throw error;
-    }
+    return mockNarration;
   }
 
-  // Generate audio using Eleven Labs TTS
-  private async generateAudio(text: string, voiceId: string): Promise<string> {
-    try {
-      const response = await fetch('https://api.elevenlabs.io/v1/text-to-speech/' + voiceId, {
-        method: 'POST',
-        headers: {
-          'Accept': 'audio/mpeg',
-          'Content-Type': 'application/json',
-          'xi-api-key': this.elevenLabsApiKey,
+  // Generate summarized workout (mock implementation)
+  async generateWorkout(summary: VideoSummary, narration: AINarration): Promise<SummarizedWorkout> {
+    // Mock workout instead of using AI
+    const mockWorkout: SummarizedWorkout = {
+      id: `workout_${Date.now()}`,
+      title: summary.title,
+      description: summary.summary,
+      exercises: [
+        {
+          name: "Breathing Exercise",
+          duration: 60,
+          instructions: ["Sit tall", "Breathe deeply", "Focus on your breath"],
+          targetMuscles: ["core"]
         },
-        body: JSON.stringify({
-          text: text,
-          model_id: 'eleven_monolingual_v1',
-          voice_settings: {
-            stability: 0.5,
-            similarity_boost: 0.5,
-          },
-        }),
-      });
+        {
+          name: "Shoulder Rolls",
+          duration: 90,
+          instructions: ["Roll shoulders forward", "Roll shoulders backward", "Repeat 5 times"],
+          targetMuscles: ["shoulders", "upper back"]
+        },
+        {
+          name: "Neck Stretches",
+          duration: 120,
+          instructions: ["Tilt head right", "Hold 3 breaths", "Tilt head left", "Hold 3 breaths"],
+          targetMuscles: ["neck"]
+        },
+        {
+          name: "Spinal Twists",
+          duration: 180,
+          instructions: ["Place right hand on left knee", "Twist left", "Hold 3 breaths", "Switch sides"],
+          targetMuscles: ["core", "back"]
+        }
+      ],
+      totalDuration: 450, // 7.5 minutes
+      difficulty: summary.difficulty,
+      equipment: summary.equipment,
+      tips: [
+        "Move slowly and mindfully",
+        "Listen to your body",
+        "Don't force any movements",
+        "Breathe deeply throughout"
+      ]
+    };
 
-      if (!response.ok) {
-        throw new Error('Failed to generate audio');
-      }
-
-      const audioBlob = await response.blob();
-      const audioUrl = URL.createObjectURL(audioBlob);
-      
-      return audioUrl;
-    } catch (error) {
-      console.error('Error generating audio:', error);
-      throw error;
-    }
+    return mockWorkout;
   }
 
   // Main method to process a YouTube video
-  async processVideo(videoId: string, voiceId: string = 'alloy'): Promise<SummarizedWorkout> {
+  async processVideo(videoUrl: string): Promise<SummarizedWorkout> {
     try {
-      console.log('Processing video:', videoId);
-
+      // Extract video ID from URL
+      const videoId = this.extractVideoId(videoUrl);
+      
+      // Get video information
       const videoInfo = await this.getVideoInfo(videoId);
+      
+      // Extract transcript
       const transcript = await this.extractTranscript(videoId);
-      const summary = await this.generateSummary(transcript, videoInfo);
-      const narration = await this.generateNarration(summary, voiceId);
-
-      const workout: SummarizedWorkout = {
-        videoInfo,
-        summary,
-        narration,
-        transcript,
-        createdAt: new Date(),
-        workoutId: `workout_${videoId}_${Date.now()}`,
-      };
-
-      this.saveWorkout(workout);
+      
+      // Generate summary
+      const summary = await this.generateSummary(transcript);
+      
+      // Generate narration
+      const narration = await this.generateNarration(summary);
+      
+      // Generate final workout
+      const workout = await this.generateWorkout(summary, narration);
+      
       return workout;
     } catch (error) {
       console.error('Error processing video:', error);
-      throw error;
+      throw new Error('Failed to process video. Please try again.');
     }
   }
 
-  // Save workout to localStorage
-  private saveWorkout(workout: SummarizedWorkout): void {
-    try {
-      const existingWorkouts = this.getSavedWorkouts();
-      existingWorkouts.push(workout);
-      
-      if (existingWorkouts.length > 50) {
-        existingWorkouts.splice(0, existingWorkouts.length - 50);
-      }
-      
-      localStorage.setItem('mobii_summarized_workouts', JSON.stringify(existingWorkouts));
-    } catch (error) {
-      console.error('Error saving workout:', error);
-    }
-  }
-
-  // Get saved workouts from localStorage
-  getSavedWorkouts(): SummarizedWorkout[] {
-    try {
-      const saved = localStorage.getItem('mobii_summarized_workouts');
-      return saved ? JSON.parse(saved) : [];
-    } catch (error) {
-      console.error('Error loading saved workouts:', error);
-      return [];
-    }
-  }
-
-  // Get a specific workout by ID
-  getWorkout(workoutId: string): SummarizedWorkout | null {
-    const workouts = this.getSavedWorkouts();
-    return workouts.find(w => w.workoutId === workoutId) || null;
-  }
-
-  // Delete a workout
-  deleteWorkout(workoutId: string): void {
-    try {
-      const workouts = this.getSavedWorkouts();
-      const filteredWorkouts = workouts.filter(w => w.workoutId !== workoutId);
-      localStorage.setItem('mobii_summarized_workouts', JSON.stringify(filteredWorkouts));
-    } catch (error) {
-      console.error('Error deleting workout:', error);
-    }
-  }
-
-  // Search YouTube for fitness videos
-  async searchFitnessVideos(query: string, maxResults: number = 10): Promise<YouTubeVideoInfo[]> {
-    try {
-      const response = await fetch(
-        `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&type=video&videoDuration=medium&videoCategoryId=17&maxResults=${maxResults}&key=${this.youtubeApiKey}`
-      );
-      
-      if (!response.ok) {
-        throw new Error('Failed to search YouTube');
-      }
-
-      const data = await response.json();
-      
-      const videoIds = data.items.map((item: any) => item.id.videoId).join(',');
-      const detailedResponse = await fetch(
-        `https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics,contentDetails&id=${videoIds}&key=${this.youtubeApiKey}`
-      );
-      
-      if (!detailedResponse.ok) {
-        throw new Error('Failed to fetch video details');
-      }
-
-      const detailedData = await detailedResponse.json();
-      
-      return detailedData.items.map((video: any) => ({
-        videoId: video.id,
-        title: video.snippet.title,
-        description: video.snippet.description,
-        duration: video.contentDetails.duration,
-        thumbnail: video.snippet.thumbnails.high.url,
-        channelTitle: video.snippet.channelTitle,
-        publishedAt: video.snippet.publishedAt,
-        viewCount: video.statistics.viewCount,
-        likeCount: video.statistics.likeCount,
-      }));
-    } catch (error) {
-      console.error('Error searching videos:', error);
-      throw error;
-    }
+  // Helper method to extract video ID from YouTube URL
+  private extractVideoId(url: string): string {
+    const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+    const match = url.match(regex);
+    return match ? match[1] : 'dQw4w9WgXcQ'; // Default fallback
   }
 }
 
 // Create singleton instance
-export const youtubeSummarizationService = new YouTubeSummarizationService();
+const youtubeSummarizationService = new YouTubeSummarizationService();
+
+export default youtubeSummarizationService;
