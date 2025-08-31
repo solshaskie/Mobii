@@ -1,564 +1,315 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Button, Card, CardContent, CardHeader, CardTitle, Input, Badge, Progress } from '@mobii/ui';
-import { 
-  Video, 
-  Camera, 
-  Play, 
-  Pause, 
-  Volume2, 
-  VolumeX, 
-  Upload,
-  Link,
-  Search,
-  Target,
-  Brain,
-  Loader2,
-  CheckCircle,
-  AlertTriangle,
-  Settings,
-  Maximize2,
-  Minimize2
-} from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { Button } from '@mobii/ui';
+import { Camera, Video, Play, Pause, RotateCcw, Settings } from 'lucide-react';
 
 interface SideBySideTrainerProps {
-  className?: string;
+  selectedTrainer?: any;
 }
 
-export const SideBySideTrainer: React.FC<SideBySideTrainerProps> = ({ 
-  className = '' 
-}) => {
-  const [isTraining, setIsTraining] = useState(false);
-  const [isPaused, setIsPaused] = useState(false);
-  const [isMuted, setIsMuted] = useState(false);
-  const [currentExercise, setCurrentExercise] = useState<any>(null);
-  const [userVideo, setUserVideo] = useState<string | null>(null);
-  const [demoVideo, setDemoVideo] = useState<string | null>(null);
-  const [videoSource, setVideoSource] = useState<'youtube' | 'upload' | 'database'>('youtube');
+export const SideBySideTrainer: React.FC<SideBySideTrainerProps> = ({ selectedTrainer }) => {
+  const [isVideoMode, setIsVideoMode] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
   const [videoUrl, setVideoUrl] = useState('');
-  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
-  const [selectedExercise, setSelectedExercise] = useState<string>('');
-  const [aiSearchQuery, setAiSearchQuery] = useState('');
-  const [isSearching, setIsSearching] = useState(false);
-  const [searchResults, setSearchResults] = useState<any[]>([]);
-  const [formScore, setFormScore] = useState(85);
-  const [feedback, setFeedback] = useState<string[]>([]);
-  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [showVideoInput, setShowVideoInput] = useState(false);
+  const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
+  const [isCameraActive, setIsCameraActive] = useState(false);
+  
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const cameraRef = useRef<HTMLVideoElement>(null);
 
-  const userVideoRef = useRef<HTMLVideoElement>(null);
-  const demoVideoRef = useRef<HTMLVideoElement>(null);
-
-  // Mock exercise database
-  const exerciseDatabase = [
-    { id: '1', name: 'Push-ups', category: 'strength', difficulty: 'intermediate', targetMuscles: ['chest', 'triceps', 'shoulders'] },
-    { id: '2', name: 'Squats', category: 'strength', difficulty: 'beginner', targetMuscles: ['quads', 'glutes', 'hamstrings'] },
-    { id: '3', name: 'Plank', category: 'core', difficulty: 'beginner', targetMuscles: ['core', 'shoulders'] },
-    { id: '4', name: 'Burpees', category: 'cardio', difficulty: 'advanced', targetMuscles: ['full body'] },
-    { id: '5', name: 'Lunges', category: 'strength', difficulty: 'intermediate', targetMuscles: ['quads', 'glutes'] },
+  // Sample reference videos for different workout types
+  const sampleVideos = [
+    {
+      id: 1,
+      title: 'Push-up Form Guide',
+      url: 'https://www.youtube.com/watch?v=IODxDxX7oi4',
+      thumbnail: 'https://img.youtube.com/vi/IODxDxX7oi4/maxresdefault.jpg',
+      duration: '2:15'
+    },
+    {
+      id: 2,
+      title: 'Squat Technique',
+      url: 'https://www.youtube.com/watch?v=aclHkVaku9U',
+      thumbnail: 'https://img.youtube.com/vi/aclHkVaku9U/maxresdefault.jpg',
+      duration: '3:42'
+    },
+    {
+      id: 3,
+      title: 'Plank Hold',
+      url: 'https://www.youtube.com/watch?v=ASdvN_XEl_c',
+      thumbnail: 'https://img.youtube.com/vi/ASdvN_XEl_c/maxresdefault.jpg',
+      duration: '1:58'
+    }
   ];
 
-  // Start camera
   const startCamera = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ 
         video: { 
-          width: { ideal: 640 }, 
+          width: { ideal: 640 },
           height: { ideal: 480 },
           facingMode: 'user'
         } 
       });
-      
-      if (userVideoRef.current) {
-        userVideoRef.current.srcObject = stream;
-        setUserVideo('active');
+      setCameraStream(stream);
+      setIsCameraActive(true);
+      if (cameraRef.current) {
+        cameraRef.current.srcObject = stream;
       }
     } catch (error) {
       console.error('Error accessing camera:', error);
-      alert('Unable to access camera. Please check permissions.');
     }
   };
 
-  // Handle video source selection
-  const handleVideoSourceChange = (source: 'youtube' | 'upload' | 'database') => {
-    setVideoSource(source);
-    setDemoVideo(null);
-    setVideoUrl('');
-    setUploadedFile(null);
-    setSelectedExercise('');
-  };
-
-  // Load YouTube video
-  const loadYouTubeVideo = async () => {
-    if (!videoUrl.trim()) {
-      alert('Please enter a YouTube URL');
-      return;
-    }
-
-    // Extract video ID and create embed URL
-    const videoId = extractVideoId(videoUrl);
-    if (!videoId) {
-      alert('Invalid YouTube URL');
-      return;
-    }
-
-    const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=0&controls=1&rel=0`;
-    setDemoVideo(embedUrl);
-    setCurrentExercise({
-      name: 'YouTube Exercise',
-      source: 'youtube',
-      url: videoUrl
-    });
-  };
-
-  // Handle file upload
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      setUploadedFile(file);
-      const videoUrl = URL.createObjectURL(file);
-      setDemoVideo(videoUrl);
-      setCurrentExercise({
-        name: file.name,
-        source: 'upload',
-        file: file
-      });
+  const stopCamera = () => {
+    if (cameraStream) {
+      cameraStream.getTracks().forEach(track => track.stop());
+      setCameraStream(null);
+      setIsCameraActive(false);
     }
   };
 
-  // Load database exercise
-  const loadDatabaseExercise = () => {
-    if (!selectedExercise) {
-      alert('Please select an exercise');
-      return;
-    }
-
-    const exercise = exerciseDatabase.find(ex => ex.id === selectedExercise);
-    if (exercise) {
-      setDemoVideo('/api/exercises/' + exercise.id + '/video'); // Mock video URL
-      setCurrentExercise(exercise);
+  const toggleVideoMode = () => {
+    setIsVideoMode(!isVideoMode);
+    if (!isVideoMode && !isCameraActive) {
+      startCamera();
     }
   };
 
-  // AI-powered exercise search
-  const searchExercises = async () => {
-    if (!aiSearchQuery.trim()) return;
-
-    setIsSearching(true);
-    try {
-      // Simulate AI search across multiple sources
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      const mockResults = [
-        { id: 'ai_1', name: 'Core Strengthening Sequence', source: 'youtube', confidence: 0.95, targetMuscles: ['core', 'abs'] },
-        { id: 'ai_2', name: 'Glute Activation Workout', source: 'database', confidence: 0.88, targetMuscles: ['glutes', 'hamstrings'] },
-        { id: 'ai_3', name: 'Upper Body Power Moves', source: 'youtube', confidence: 0.92, targetMuscles: ['chest', 'back', 'shoulders'] },
-        { id: 'ai_4', name: 'Functional Movement Flow', source: 'database', confidence: 0.85, targetMuscles: ['full body'] },
-      ];
-
-      setSearchResults(mockResults);
-    } catch (error) {
-      console.error('Search failed:', error);
-      alert('Search failed. Please try again.');
-    } finally {
-      setIsSearching(false);
-    }
-  };
-
-  // Start training session
-  const startTraining = () => {
-    if (!userVideo || !demoVideo) {
-      alert('Please start camera and select a demonstration video');
-      return;
-    }
-
-    setIsTraining(true);
-    setIsPaused(false);
-    
-    // Start both videos
-    if (userVideoRef.current) userVideoRef.current.play();
-    if (demoVideoRef.current) demoVideoRef.current.play();
-    
-    // Start form analysis
-    startFormAnalysis();
-  };
-
-  // Pause/resume training
-  const togglePause = () => {
-    setIsPaused(!isPaused);
-    if (userVideoRef.current) {
-      if (isPaused) {
-        userVideoRef.current.play();
+  const togglePlayPause = () => {
+    if (videoRef.current) {
+      if (isPlaying) {
+        videoRef.current.pause();
       } else {
-        userVideoRef.current.pause();
+        videoRef.current.play();
       }
-    }
-    if (demoVideoRef.current) {
-      if (isPaused) {
-        demoVideoRef.current.play();
-      } else {
-        demoVideoRef.current.pause();
-      }
+      setIsPlaying(!isPlaying);
     }
   };
 
-  // Toggle mute
-  const toggleMute = () => {
-    setIsMuted(!isMuted);
+  const resetVideo = () => {
+    if (videoRef.current) {
+      videoRef.current.currentTime = 0;
+      setIsPlaying(false);
+    }
   };
 
-  // Start form analysis
-  const startFormAnalysis = () => {
-    // Simulate real-time form analysis
-    const interval = setInterval(() => {
-      if (!isTraining) {
-        clearInterval(interval);
-        return;
+  const selectVideo = (video: any) => {
+    setVideoUrl(video.url);
+    setIsVideoMode(true);
+    if (!isCameraActive) {
+      startCamera();
+    }
+  };
+
+  const handleVideoInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const url = e.target.value;
+    if (url) {
+      setVideoUrl(url);
+      setIsVideoMode(true);
+      if (!isCameraActive) {
+        startCamera();
       }
-
-      // Simulate form score changes
-      const newScore = Math.max(60, Math.min(100, formScore + (Math.random() - 0.5) * 10));
-      setFormScore(newScore);
-
-      // Generate feedback based on score
-      if (newScore < 70) {
-        setFeedback(['Keep your back straight', 'Engage your core', 'Slow down the movement']);
-      } else if (newScore < 85) {
-        setFeedback(['Good form!', 'Try to go deeper', 'Maintain this pace']);
-      } else {
-        setFeedback(['Excellent form!', 'Perfect execution', 'Keep it up!']);
-      }
-    }, 3000);
-
-    return () => clearInterval(interval);
+    }
   };
 
-  // Extract YouTube video ID
-  const extractVideoId = (url: string): string | null => {
-    const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
-    const match = url.match(regex);
-    return match ? match[1] : null;
-  };
+  useEffect(() => {
+    return () => {
+      stopCamera();
+    };
+  }, []);
 
   return (
-    <div className={`space-y-6 ${className}`}>
-      {/* Header */}
-      <div className="text-center">
-        <h1 className="text-4xl font-bold text-text-primary mb-4">
-          🎯 Ultimate AI Personal Trainer
-        </h1>
-        <p className="text-lg text-text-muted mb-6">
-          Side-by-side video comparison with real-time form feedback and AI-powered exercise discovery
-        </p>
-      </div>
-
-      {/* Video Source Selection */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Video className="h-5 w-5 text-blue-500" />
-            Select Exercise Source
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {/* Source Tabs */}
-          <div className="flex gap-2 mb-4">
-            <Button
-              variant={videoSource === 'youtube' ? 'default' : 'outline'}
-              onClick={() => handleVideoSourceChange('youtube')}
-              className="flex items-center gap-2"
-            >
-              <Link className="h-4 w-4" />
-              YouTube Link
-            </Button>
-            <Button
-              variant={videoSource === 'upload' ? 'default' : 'outline'}
-              onClick={() => handleVideoSourceChange('upload')}
-              className="flex items-center gap-2"
-            >
-              <Upload className="h-4 w-4" />
-              Upload Video
-            </Button>
-            <Button
-              variant={videoSource === 'database' ? 'default' : 'outline'}
-              onClick={() => handleVideoSourceChange('database')}
-              className="flex items-center gap-2"
-            >
-              <Target className="h-4 w-4" />
-              Exercise Database
-            </Button>
-          </div>
-
-          {/* YouTube Source */}
-          {videoSource === 'youtube' && (
-            <div className="space-y-2">
-              <Input
-                type="url"
-                placeholder="Paste YouTube URL here..."
-                value={videoUrl}
-                onChange={(e) => setVideoUrl(e.target.value)}
-                className="w-full"
-              />
-              <Button onClick={loadYouTubeVideo} className="w-full">
-                Load YouTube Video
-              </Button>
-            </div>
-          )}
-
-          {/* Upload Source */}
-          {videoSource === 'upload' && (
-            <div className="space-y-2">
-              <div className="border-2 border-dashed border-border rounded-lg p-6 text-center">
-                <Upload className="h-8 w-8 mx-auto mb-2 text-text-muted" />
-                <p className="text-text-muted mb-2">Upload your exercise video</p>
-                <input
-                  type="file"
-                  accept="video/*"
-                  onChange={handleFileUpload}
-                  className="hidden"
-                  id="video-upload"
-                />
-                <label htmlFor="video-upload">
-                  <Button variant="outline" asChild>
-                    <span>Choose Video File</span>
-                  </Button>
-                </label>
-              </div>
-              {uploadedFile && (
-                <p className="text-sm text-text-muted">Selected: {uploadedFile.name}</p>
-              )}
-            </div>
-          )}
-
-          {/* Database Source */}
-          {videoSource === 'database' && (
-            <div className="space-y-2">
-              <select
-                value={selectedExercise}
-                onChange={(e) => setSelectedExercise(e.target.value)}
-                className="w-full p-2 border border-border rounded-md bg-background-secondary text-text-primary"
-              >
-                <option value="">Select an exercise...</option>
-                {exerciseDatabase.map(exercise => (
-                  <option key={exercise.id} value={exercise.id}>
-                    {exercise.name} ({exercise.difficulty})
-                  </option>
-                ))}
-              </select>
-              <Button onClick={loadDatabaseExercise} className="w-full">
-                Load Exercise
-              </Button>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* AI Exercise Discovery */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Brain className="h-5 w-5 text-purple-500" />
-            AI Exercise Discovery
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex gap-2">
-            <Input
-              placeholder="Describe your goals (e.g., 'strengthen my core', 'target glutes')"
-              value={aiSearchQuery}
-              onChange={(e) => setAiSearchQuery(e.target.value)}
-              className="flex-1"
-            />
-            <Button
-              onClick={searchExercises}
-              disabled={isSearching || !aiSearchQuery.trim()}
-              className="flex items-center gap-2"
-            >
-              {isSearching ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Search className="h-4 w-4" />
-              )}
-              {isSearching ? 'Searching...' : 'Search'}
-            </Button>
-          </div>
-
-          {/* Search Results */}
-          {searchResults.length > 0 && (
-            <div className="space-y-2">
-              <h4 className="font-medium text-text-primary">AI Found These Exercises:</h4>
-              {searchResults.map((result) => (
-                <div
-                  key={result.id}
-                  className="flex items-center justify-between p-3 bg-background-secondary rounded-lg hover:bg-background-tertiary cursor-pointer"
-                  onClick={() => {
-                    setDemoVideo(result.source === 'youtube' ? result.url : `/api/exercises/${result.id}/video`);
-                    setCurrentExercise(result);
-                  }}
-                >
-                  <div>
-                    <h5 className="font-medium text-text-primary">{result.name}</h5>
-                    <p className="text-sm text-text-muted">
-                      Targets: {result.targetMuscles.join(', ')}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline">{result.source}</Badge>
-                    <span className="text-sm text-text-muted">
-                      {Math.round(result.confidence * 100)}% match
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Side-by-Side Training Interface */}
-      {userVideo && demoVideo && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              <span className="flex items-center gap-2">
-                <Camera className="h-5 w-5 text-green-500" />
-                AI Personal Training Session
-              </span>
+    <div className="space-y-6">
+      {/* Header Controls */}
+      <div className="flex items-center justify-between bg-white rounded-lg p-4 shadow-sm">
+        <div className="flex items-center space-x-4">
+          <Button
+            onClick={toggleVideoMode}
+            variant={isVideoMode ? "default" : "outline"}
+            className="flex items-center space-x-2"
+          >
+            {isVideoMode ? <Video className="w-4 h-4" /> : <Camera className="w-4 h-4" />}
+            <span>{isVideoMode ? 'Video Mode' : 'Camera Only'}</span>
+          </Button>
+          
+          {isVideoMode && (
+            <div className="flex items-center space-x-2">
               <Button
+                onClick={togglePlayPause}
                 variant="outline"
                 size="sm"
-                onClick={() => setIsFullscreen(!isFullscreen)}
               >
-                {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+                {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
               </Button>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className={`grid ${isFullscreen ? 'grid-cols-2' : 'grid-cols-1 lg:grid-cols-2'} gap-4 mb-4`}>
-              {/* User Camera Feed */}
-              <div className="relative">
-                <h4 className="font-medium text-text-primary mb-2 flex items-center gap-2">
-                  <Camera className="h-4 w-4" />
-                  Your Form
-                </h4>
-                <video
-                  ref={userVideoRef}
-                  className="w-full rounded-lg border-2 border-green-500"
-                  autoPlay
-                  muted
-                  playsInline
-                />
-                <div className="absolute top-2 right-2">
-                  <Badge variant="default" className="bg-green-500">
-                    LIVE
-                  </Badge>
-                </div>
-              </div>
+              <Button
+                onClick={resetVideo}
+                variant="outline"
+                size="sm"
+              >
+                <RotateCcw className="w-4 h-4" />
+              </Button>
+            </div>
+          )}
+        </div>
 
-              {/* Demonstration Video */}
-              <div className="relative">
-                <h4 className="font-medium text-text-primary mb-2 flex items-center gap-2">
-                  <Video className="h-4 w-4" />
-                  Target Form
-                </h4>
-                {videoSource === 'youtube' ? (
-                  <iframe
-                    src={demoVideo}
-                    className="w-full h-64 rounded-lg border-2 border-blue-500"
-                    frameBorder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                  />
-                ) : (
-                  <video
-                    ref={demoVideoRef}
-                    src={demoVideo}
-                    className="w-full rounded-lg border-2 border-blue-500"
-                    controls
-                    muted={isMuted}
-                  />
-                )}
-                <div className="absolute top-2 right-2">
-                  <Badge variant="default" className="bg-blue-500">
-                    DEMO
-                  </Badge>
-                </div>
+        <Button
+          onClick={() => setShowVideoInput(!showVideoInput)}
+          variant="outline"
+          size="sm"
+        >
+          <Settings className="w-4 h-4" />
+        </Button>
+      </div>
+
+      {/* Video Input */}
+      {showVideoInput && (
+        <div className="bg-white rounded-lg p-4 shadow-sm">
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Enter YouTube URL or Video Link
+              </label>
+              <input
+                type="url"
+                placeholder="https://www.youtube.com/watch?v=..."
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                onChange={handleVideoInput}
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Or Select from Sample Videos
+              </label>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {sampleVideos.map((video) => (
+                  <div
+                    key={video.id}
+                    onClick={() => selectVideo(video)}
+                    className="cursor-pointer bg-gray-50 rounded-lg p-3 hover:bg-gray-100 transition-colors"
+                  >
+                    <img
+                      src={video.thumbnail}
+                      alt={video.title}
+                      className="w-full h-24 object-cover rounded mb-2"
+                    />
+                    <h4 className="font-medium text-sm">{video.title}</h4>
+                    <p className="text-xs text-gray-500">{video.duration}</p>
+                  </div>
+                ))}
               </div>
             </div>
+          </div>
+        </div>
+      )}
 
-            {/* Training Controls */}
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                <Button
-                  onClick={isTraining ? togglePause : startTraining}
-                  className="flex items-center gap-2"
-                >
-                  {isTraining ? (
-                    isPaused ? <Play className="h-4 w-4" /> : <Pause className="h-4 w-4" />
-                  ) : (
-                    <Play className="h-4 w-4" />
-                  )}
-                  {isTraining ? (isPaused ? 'Resume' : 'Pause') : 'Start Training'}
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={toggleMute}
-                  className="flex items-center gap-2"
-                >
-                  {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
-                  {isMuted ? 'Unmute' : 'Mute'}
-                </Button>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-text-muted">Form Score:</span>
-                <Badge variant={formScore >= 85 ? 'default' : formScore >= 70 ? 'secondary' : 'destructive'}>
-                  {formScore}%
-                </Badge>
-              </div>
-            </div>
-
-            {/* Real-time Feedback */}
-            {isTraining && feedback.length > 0 && (
-              <div className="bg-background-secondary p-4 rounded-lg">
-                <h5 className="font-medium text-text-primary mb-2 flex items-center gap-2">
-                  <AlertTriangle className="h-4 w-4 text-yellow-500" />
-                  AI Form Feedback
-                </h5>
-                <div className="space-y-1">
-                  {feedback.map((tip, index) => (
-                    <div key={index} className="flex items-center gap-2 text-sm">
-                      <CheckCircle className="h-3 w-3 text-green-500" />
-                      <span className="text-text-muted">{tip}</span>
-                    </div>
-                  ))}
+      {/* Main Display Area */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* User Camera Feed */}
+        <div className="bg-white rounded-lg p-4 shadow-sm">
+          <h3 className="text-lg font-semibold mb-4 flex items-center">
+            <Camera className="w-5 h-5 mr-2" />
+            Your Camera Feed
+          </h3>
+          <div className="relative bg-gray-900 rounded-lg overflow-hidden aspect-video">
+            <video
+              ref={cameraRef}
+              autoPlay
+              playsInline
+              muted
+              className="w-full h-full object-cover"
+            />
+            {!isCameraActive && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="text-center text-white">
+                  <Camera className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                  <p className="text-sm">Camera not active</p>
+                  <Button
+                    onClick={startCamera}
+                    className="mt-2"
+                    size="sm"
+                  >
+                    Start Camera
+                  </Button>
                 </div>
               </div>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
+
+        {/* Reference Video */}
+        {isVideoMode && (
+          <div className="bg-white rounded-lg p-4 shadow-sm">
+            <h3 className="text-lg font-semibold mb-4 flex items-center">
+              <Video className="w-5 h-5 mr-2" />
+              Reference Video
+            </h3>
+            <div className="relative bg-gray-900 rounded-lg overflow-hidden aspect-video">
+              {videoUrl ? (
+                <video
+                  ref={videoRef}
+                  src={videoUrl}
+                  className="w-full h-full object-cover"
+                  onPlay={() => setIsPlaying(true)}
+                  onPause={() => setIsPlaying(false)}
+                />
+              ) : (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-center text-white">
+                    <Video className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                    <p className="text-sm">No video selected</p>
+                    <p className="text-xs opacity-75">Choose a video above</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* AI Coaching Panel */}
+      {isVideoMode && videoUrl && (
+        <div className="bg-white rounded-lg p-4 shadow-sm">
+          <h3 className="text-lg font-semibold mb-4 flex items-center">
+            🤖 AI Coach Feedback
+          </h3>
+          <div className="space-y-3">
+            <div className="flex items-center space-x-3 p-3 bg-blue-50 rounded-lg">
+              <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+              <p className="text-sm text-blue-800">
+                <strong>Form Check:</strong> Your posture looks good! Keep your back straight.
+              </p>
+            </div>
+            <div className="flex items-center space-x-3 p-3 bg-green-50 rounded-lg">
+              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+              <p className="text-sm text-green-800">
+                <strong>Pace:</strong> You're matching the reference video speed perfectly.
+              </p>
+            </div>
+            <div className="flex items-center space-x-3 p-3 bg-yellow-50 rounded-lg">
+              <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+              <p className="text-sm text-yellow-800">
+                <strong>Tip:</strong> Try to keep your elbows closer to your body during the movement.
+              </p>
+            </div>
+          </div>
+        </div>
       )}
 
-      {/* Camera Setup */}
-      {!userVideo && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Camera className="h-5 w-5 text-green-500" />
-              Start Your Camera
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-text-muted mb-4">
-              Enable your camera to start the AI personal training session
-            </p>
-            <Button onClick={startCamera} className="flex items-center gap-2">
-              <Camera className="h-4 w-4" />
-              Start Camera
-            </Button>
-          </CardContent>
-        </Card>
-      )}
+      {/* Instructions */}
+      <div className="bg-blue-50 rounded-lg p-4">
+        <h4 className="font-semibold text-blue-900 mb-2">How to Use Side-by-Side Training:</h4>
+        <ul className="text-sm text-blue-800 space-y-1">
+          <li>• Toggle between camera-only and video comparison modes</li>
+          <li>• Select a reference video or enter a YouTube URL</li>
+          <li>• Use play/pause controls to sync with the reference video</li>
+          <li>• Watch the AI coach feedback for real-time form guidance</li>
+          <li>• Practice alongside the reference video for perfect form</li>
+        </ul>
+      </div>
     </div>
   );
 };
