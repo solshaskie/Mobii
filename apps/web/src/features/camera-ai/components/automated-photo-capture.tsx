@@ -681,14 +681,14 @@ export const AutomatedPhotoCapture: React.FC<AutomatedPhotoCaptureProps> = ({
         <CardContent>
           <div className="relative">
             {/* Video Element */}
-            <div className="relative bg-black rounded-lg overflow-hidden">
+            <div className="relative bg-black rounded-lg overflow-hidden" style={{ minHeight: '500px' }}>
               <video
                 ref={videoRef}
                 autoPlay
                 playsInline
                 muted
-                className="w-full h-96 object-cover"
-                style={{ minHeight: '384px' }}
+                className="w-full h-full object-cover"
+                style={{ minHeight: '500px' }}
               />
               
               {/* Camera Status Indicator */}
@@ -730,6 +730,32 @@ export const AutomatedPhotoCapture: React.FC<AutomatedPhotoCaptureProps> = ({
                   onPositionUpdate={handlePositionUpdate}
                   videoDimensions={videoDimensions}
                 />
+              )}
+              
+              {/* Test Overlay Button - Remove this after testing */}
+              {session && isCameraActive && (
+                <button
+                  onClick={() => {
+                    console.log('Overlay test clicked');
+                    setIsOptimalPosition(!isOptimalPosition);
+                  }}
+                  style={{
+                    position: 'absolute',
+                    top: '10px',
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    backgroundColor: 'rgba(255, 0, 0, 0.8)',
+                    color: 'white',
+                    padding: '4px 8px',
+                    borderRadius: '4px',
+                    fontSize: '10px',
+                    zIndex: 100000,
+                    border: 'none',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Test Overlay
+                </button>
               )}
             </div>
             

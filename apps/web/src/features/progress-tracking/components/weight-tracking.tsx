@@ -239,7 +239,7 @@ export const WeightTracking: React.FC<WeightTrackingProps> = ({ className = '' }
               </div>
               <div className="text-center">
                 <div className="text-lg font-bold text-gray-800">
-                  {analytics.weightRange}
+                  {analytics.weightRange.range.toFixed(1)} lbs
                 </div>
                 <div className="text-sm text-gray-600">Weight Range</div>
               </div>

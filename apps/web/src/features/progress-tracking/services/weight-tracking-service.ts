@@ -253,7 +253,11 @@ class WeightTrackingService {
         weeklyAverage: 0,
         monthlyAverage: 0,
         consistency: 0,
-        weightRange: '0 lbs'
+        weightRange: {
+          highest: 0,
+          lowest: 0,
+          range: 0
+        }
       };
     }
 
@@ -302,7 +306,11 @@ class WeightTrackingService {
     const consistency = Math.round((recentEntries.length / 30) * 100);
 
     // Calculate weight range
-    const weightRange = `${minWeight.toFixed(1)} - ${maxWeight.toFixed(1)} lbs`;
+    const weightRange = {
+      highest: Math.round(maxWeight * 10) / 10,
+      lowest: Math.round(minWeight * 10) / 10,
+      range: Math.round((maxWeight - minWeight) * 10) / 10
+    };
 
     return {
       averageWeight: Math.round(averageWeight * 10) / 10,

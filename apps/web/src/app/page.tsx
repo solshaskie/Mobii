@@ -19,7 +19,10 @@ import {
   Calendar,
   Users,
   CheckCircle,
-  Flame
+  Flame,
+  Youtube,
+  Brain,
+  User
 } from 'lucide-react';
 
 export default function HomePage() {
@@ -124,7 +127,7 @@ export default function HomePage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12"
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6 mb-12"
         >
           <BrandCard
             title="AI-Powered Workouts"
@@ -174,6 +177,57 @@ export default function HomePage() {
               onClick={() => window.location.href = '/analytics'}
             >
               View Analytics
+            </Button>
+          </BrandCard>
+
+          <BrandCard
+            title="YouTube Video Summarization"
+            icon={<Youtube className="h-5 w-5" />}
+            variant="gradient"
+          >
+            <p className="text-text-muted mb-4">
+              Transform any YouTube fitness video into an AI-narrated workout session with personalized instructions.
+            </p>
+            <Button
+              variant="ghost"
+              className="w-full"
+              onClick={() => window.location.href = '/youtube-summarization'}
+            >
+              Try Video Summarization
+            </Button>
+          </BrandCard>
+
+          <BrandCard
+            title="AI Movement Analysis"
+            icon={<Brain className="h-5 w-5" />}
+            variant="gradient"
+          >
+            <p className="text-text-muted mb-4">
+              Revolutionary AI that analyzes any fitness video and automatically classifies exercises with real-time form feedback.
+            </p>
+            <Button
+              variant="ghost"
+              className="w-full"
+              onClick={() => window.location.href = '/ai-movement-analysis'}
+            >
+              Try AI Movement Analysis
+            </Button>
+          </BrandCard>
+
+          <BrandCard
+            title="AI Personal Trainer"
+            icon={<User className="h-5 w-5" />}
+            variant="gradient"
+          >
+            <p className="text-text-muted mb-4">
+              Choose your AI trainer personality and let them take complete control of your workout planning and coaching.
+            </p>
+            <Button
+              variant="ghost"
+              className="w-full"
+              onClick={() => window.location.href = '/ai-trainer-personality'}
+            >
+              Meet Your AI Trainer
             </Button>
           </BrandCard>
 
@@ -269,6 +323,70 @@ export default function HomePage() {
               </div>
             </CardContent>
           </Card>
+        </motion.section>
+
+        {/* Enhanced Features Showcase */}
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.35 }}
+          className="mb-12"
+        >
+          <div className="text-center mb-8">
+            <h2 className="text-3xl font-bold text-text-primary mb-4">
+              Enhanced Progress Tracking Features
+            </h2>
+            <p className="text-lg text-text-muted max-w-3xl mx-auto">
+              Explore our advanced progress tracking capabilities with AI-powered insights and comprehensive analytics.
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => window.location.href = '/enhanced-profile-demo'}>
+              <CardContent className="p-6 text-center">
+                <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-blue-100 flex items-center justify-center">
+                  <Users className="h-6 w-6 text-blue-600" />
+                </div>
+                <h3 className="text-xl font-semibold text-text-primary mb-2">Enhanced Profile</h3>
+                <p className="text-text-muted mb-4">
+                  Comprehensive fitness profile management with privacy controls, fitness assessments, and data export.
+                </p>
+                <Button variant="outline" className="w-full">
+                  View Demo
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => window.location.href = '/enhanced-weight-tracking-demo'}>
+              <CardContent className="p-6 text-center">
+                <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-green-100 flex items-center justify-center">
+                  <TrendingUp className="h-6 w-6 text-green-600" />
+                </div>
+                <h3 className="text-xl font-semibold text-text-primary mb-2">Enhanced Weight Tracking</h3>
+                <p className="text-text-muted mb-4">
+                  AI-powered weight predictions, insights, analytics, and comprehensive goal management.
+                </p>
+                <Button variant="outline" className="w-full">
+                  View Demo
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => window.location.href = '/enhanced-progress-photos-demo'}>
+              <CardContent className="p-6 text-center">
+                <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-purple-100 flex items-center justify-center">
+                  <BarChart3 className="h-6 w-6 text-purple-600" />
+                </div>
+                <h3 className="text-xl font-semibold text-text-primary mb-2">Enhanced Progress Photos</h3>
+                <p className="text-text-muted mb-4">
+                  AI analysis, session organization, privacy controls, and comprehensive progress analytics.
+                </p>
+                <Button variant="outline" className="w-full">
+                  View Demo
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
         </motion.section>
 
         {/* Call to Action */}

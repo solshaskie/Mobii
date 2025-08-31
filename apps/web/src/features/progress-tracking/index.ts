@@ -1,35 +1,40 @@
 // Progress Tracking Module - Main Export
 // This module handles all progress tracking functionality including:
+// - User profile management
 // - Weight tracking and analytics
-// - User profiles and progress photos
-// - Achievement system
-// - Progress analytics and insights
+// - Progress photos
+// - Fitness assessments
+// - Data export and privacy controls
 
-export { WeightTracking } from './components/weight-tracking';
 export { UserProfile } from './components/user-profile';
+export { EnhancedUserProfile } from './components/enhanced-user-profile';
+export { WeightTracking } from './components/weight-tracking';
+export { EnhancedWeightTracking } from './components/enhanced-weight-tracking';
+export { EnhancedProgressPhotos } from './components/enhanced-progress-photos';
 
-export { weightTrackingService } from './services/weight-tracking-service';
 export { userProfileService } from './services/user-profile-service';
-export { achievementService } from './services/achievement-service';
-export { progressPhotoCaptureService } from './services/progress-photo-capture-service';
+export { weightTrackingService } from './services/weight-tracking-service';
 
-export type { WeightEntry, WeightGoal, WeightProgress, WeightAnalytics } from './types';
-export type { UserProfile as UserProfileType, ProgressPhoto, UserStats } from './types';
-export type { Achievement, UserStats as AchievementUserStats } from './types';
+export type { 
+  UserProfile as UserProfileType,
+  ProgressPhoto,
+  UserStats,
+  WeightEntry,
+  WeightGoal,
+  WeightProgress,
+  WeightAnalytics
+} from './types';
 
 // Feature gate for premium progress tracking features
-export const progressTrackingFeatureGate = {
-  isEnabled: (userId?: string) => {
-    // TODO: Implement user-based feature checking
-    // For now, always enabled for development
-    return true;
-  },
-  requirePremium: true,
-  features: {
-    advancedAnalytics: true,
-    progressPhotos: true,
-    achievementSystem: true,
-    goalTracking: true,
-    trendAnalysis: true,
-  }
-};
+export const PROGRESS_TRACKING_FEATURES = {
+  enhancedAnalytics: true,
+  dataExport: true,
+  fitnessAssessments: true,
+  advancedPrivacy: true,
+  enhancedProgressPhotos: true,
+  aiPhotoAnalysis: true,
+  photoCompression: true,
+  enhancedWeightTracking: true,
+  weightPredictions: true,
+  aiInsights: true
+} as const;

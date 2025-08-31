@@ -3,6 +3,19 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 
+// Add CSS animations
+const overlayStyles = `
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    50% { opacity: 0.8; transform: translate(-50%, -50%) scale(1.1); }
+  }
+  
+  @keyframes glow {
+    0%, 100% { box-shadow: 0 0 20px #00ff00, 0 0 40px #00ff00, 0 0 60px #00ff00; }
+    50% { box-shadow: 0 0 30px #00ff00, 0 0 60px #00ff00, 0 0 90px #00ff00; }
+  }
+`;
+
 interface DynamicAROverlayProps {
   videoElement: HTMLVideoElement | null;
   photoType: string;
@@ -92,18 +105,21 @@ export const DynamicAROverlay: React.FC<DynamicAROverlayProps> = ({
   }
 
   return (
-    <div 
-      ref={containerRef}
-      className={`absolute inset-0 pointer-events-none ${className}`} 
-      style={{ 
-        zIndex: 99999,
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%'
-      }}
-    >
+    <>
+      <style>{overlayStyles}</style>
+      <div 
+        ref={containerRef}
+        className={`absolute inset-0 pointer-events-none ${className}`} 
+        style={{ 
+          zIndex: 99999,
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          pointerEvents: 'none'
+        }}
+      >
       {/* Skeleton Overlay Canvas */}
       {showSkeleton && (
         <canvas
@@ -128,12 +144,14 @@ export const DynamicAROverlay: React.FC<DynamicAROverlayProps> = ({
           left: '50%',
           transform: 'translate(-50%, -50%)',
           zIndex: 99999,
-          fontSize: '6rem',
+          fontSize: '8rem',
           fontWeight: 'bold',
           color: 'white',
-          textShadow: '0 0 20px white, 0 0 40px white, 0 0 60px white, 0 0 80px white',
-          filter: 'drop-shadow(0 0 10px white) drop-shadow(0 0 20px white)',
-          animation: 'pulse 2s infinite'
+          textShadow: '0 0 20px white, 0 0 40px white, 0 0 60px white, 0 0 80px white, 0 0 100px white',
+          filter: 'drop-shadow(0 0 10px white) drop-shadow(0 0 20px white) drop-shadow(0 0 30px white)',
+          animation: 'pulse 1.5s infinite',
+          userSelect: 'none',
+          pointerEvents: 'none'
         }}
       >
         ✕
@@ -146,13 +164,14 @@ export const DynamicAROverlay: React.FC<DynamicAROverlayProps> = ({
           top: '50%',
           left: '50%',
           transform: 'translate(-50%, -50%)',
-          width: '80px',
-          height: '80px',
-          border: '3px solid #00ff00',
-          backgroundColor: 'rgba(0, 255, 0, 0.1)',
+          width: '120px',
+          height: '120px',
+          border: '4px solid #00ff00',
+          backgroundColor: 'rgba(0, 255, 0, 0.15)',
           borderRadius: '50%',
           zIndex: 99997,
-          animation: isOptimal ? 'pulse 1s infinite' : 'none'
+          animation: isOptimal ? 'glow 2s infinite' : 'pulse 2s infinite',
+          boxShadow: '0 0 20px #00ff00, 0 0 40px #00ff00'
         }}
       />
 
@@ -256,6 +275,7 @@ export const DynamicAROverlay: React.FC<DynamicAROverlayProps> = ({
           100% { opacity: 1; }
         }
       `}</style>
-    </div>
+      </div>
+    </>
   );
 };

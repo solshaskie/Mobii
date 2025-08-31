@@ -47,7 +47,11 @@ export interface WeightAnalytics {
   weeklyAverage: number;
   monthlyAverage: number;
   consistency: number;
-  weightRange: string;
+  weightRange: {
+    highest: number;
+    lowest: number;
+    range: number;
+  };
 }
 
 export interface UserProfile {

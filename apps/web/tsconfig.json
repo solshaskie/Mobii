@@ -1,4 +1,5 @@
 {
+  "extends": "../../tsconfig.json",
   "compilerOptions": {
     "lib": [
       "dom",
@@ -20,7 +21,14 @@
       {
         "name": "next"
       }
-    ]
+    ],
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@mobii/shared": ["../../packages/shared/src"],
+      "@mobii/ui": ["../../packages/ui/src"],
+      "@mobii/database": ["../../packages/database/src"]
+    }
   },
   "include": [
     "next-env.d.ts",
